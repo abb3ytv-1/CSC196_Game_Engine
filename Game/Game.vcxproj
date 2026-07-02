@@ -111,12 +111,12 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>C:\All_School_Work\Summer_Classes\CSC196_C++\Game_Engine\ThirdParty\SDL3-3\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)ThirdParty\SDL3-3\include;$(SolutionDir)Engine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\All_School_Work\Summer_Classes\CSC196_C++\Game_Engine\ThirdParty\SDL3-3\lib\x64</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)ThirdParty\SDL3-3\lib\$(PlatformTarget)</AdditionalLibraryDirectories>
       <AdditionalDependencies>sdl3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Manifest>

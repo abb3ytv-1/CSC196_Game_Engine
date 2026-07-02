@@ -6,60 +6,61 @@
 
 int main()
 {
-    SDL_Init(SDL_INIT_VIDEO);
-
-    SDL_Window* window = SDL_CreateWindow("SDL3 Project", 1280, 1024, 0);
-    if (window == nullptr) {
-        std::cerr << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
-        SDL_Quit();
-        return 1;
-    }
-
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, NULL);
-    if (renderer == nullptr) {
-        std::cerr << "SDL_CreateRenderer Error: " << SDL_GetError() << std::endl;
-        SDL_DestroyWindow(window);
-        SDL_Quit();
-        return 1;
-    }
+    nu::Renderer renderer;
+    renderer.Initialize("Game Engine", 1280, 1024);
 
     SDL_Event e;
     bool quit = false;
 
-    // Define a rectangle
-    SDL_FRect greenSquare{ 270, 190, 200, 200 };
 
     while (!quit) {
         while (SDL_PollEvent(&e)) {
-            if (e.type == SDL_EVENT_QUIT) {
+            if (e.type == SDL_EVENT_QUIT)
+            {
                 quit = true;
             }
         }
 
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); // Set render draw color to black
-        SDL_RenderClear(renderer); // Clear the renderer
+        renderer.SetColor(0, 0, 0, 255);
+        renderer.Clear();
 
-
-		// draw 1000 random points
-		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+        // Draw 1000 random points
         for (int i = 0; i < 1000; i++) {
-			SDL_RenderPoint(renderer, rand() % 1280, rand() % 1024);
+            renderer.SetColor(rand() % 256, rand() % 256, rand() % 256, 255);
+
+            renderer.DrawPoint(
+                rand() % 1280,
+                rand() % 1024
+            );
         }
 
-        SDL_SetRenderDrawColor(renderer, rand() % 256, rand() % 256, rand() % 256, rand() % 256);
-        SDL_RenderFillRect(renderer, &greenSquare); // Render the rectangle
+        // Draw 10 random lines
+        for (int i = 0; i < 10; i++) {
+            renderer.SetColor(rand() % 256, rand() % 256, rand() % 256, 255);
 
-        SDL_SetRenderDrawColor(renderer, 0, 255, 255, 255);
-        SDL_RenderDebugText(renderer, 10, 10, "Hello World!");
+            renderer.DrawLine(
+                rand() % 1280,
+                rand() % 1024,
+                rand() % 1280,
+                rand() % 1024
+            );
+        }
 
-        SDL_RenderPresent(renderer); // Render the screen
+        // Draw 10 random rectangles
+        for (int i = 0; i < 10; i++) {
+            renderer.SetColor(rand() % 256, rand() % 256, rand() % 256, 255);
+
+            renderer.DrawRect(
+                rand() % 1180,
+                rand() % 924,
+                20 + rand() % 100,
+                20 + rand() % 100
+            );
+        }
+
+        renderer.Present();
     }
 
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
-    SDL_Quit();
-
+	renderer.Shutdown();
     return 0;
-
-}
-
+};

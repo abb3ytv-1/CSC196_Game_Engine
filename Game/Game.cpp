@@ -1,66 +1,72 @@
 #include "../Engine/Engine.h"
-#include "SDL3/SDL.h"
-
-#include <iostream>
-
 
 int main()
 {
+    // INITTIALIZEATION
     nu::Renderer renderer;
-    renderer.Initialize("Game Engine", 1280, 1024);
+    renderer.Initialize("Game Engine", 1920, 1080);
 
-    SDL_Event e;
+    std::vector<nu::Vector2> v;
+
+    for (int i = 0; i < 3000; i++) {
+        v.push_back({ nu::RandomFloat(1920), nu::RandomFloat(1080) });
+    }
+
+    // handle events
     bool quit = false;
 
-
     while (!quit) {
-        while (SDL_PollEvent(&e)) {
-            if (e.type == SDL_EVENT_QUIT)
+        // UPDATE
+        SDL_Event event;
+        while (SDL_PollEvent(&event)) {
+            if (event.type == SDL_EVENT_QUIT)
             {
                 quit = true;
             }
         }
 
+        // RENDER
         renderer.SetColor(0, 0, 0, 255);
         renderer.Clear();
 
-        // Draw 1000 random points
-        for (int i = 0; i < 1000; i++) {
-            renderer.SetColor(rand() % 256, rand() % 256, rand() % 256, 255);
+        // Draw 3000 random points
+        for (int i = 0; i < 3000; i++) {
+            renderer.SetColor(nu::RandomInt(256), nu::RandomInt(256), nu::RandomInt(256), 255);
 
             renderer.DrawPoint(
-                rand() % 1280,
-                rand() % 1024
+                v[i].x,
+                v[i].y
             );
         }
 
-        // Draw 10 random lines
-        for (int i = 0; i < 10; i++) {
-            renderer.SetColor(rand() % 256, rand() % 256, rand() % 256, 255);
+        //// Draw 10 random lines
+        //for (int i = 0; i < 10; i++) {
+        //    renderer.SetColor(nu::RandomInt(256), nu::RandomInt(256), nu::RandomInt(256), 255);
 
-            renderer.DrawLine(
-                rand() % 1280,
-                rand() % 1024,
-                rand() % 1280,
-                rand() % 1024
-            );
-        }
+        //    renderer.DrawLine(
+        //        nu::RandomFloat(1280),
+        //        nu::RandomFloat(1024),
+        //        nu::RandomFloat(1280),
+        //        nu::RandomFloat(1024)
+        //    );
+        //}
 
-        // Draw 10 random rectangles
-        for (int i = 0; i < 10; i++) {
-            renderer.SetColor(rand() % 256, rand() % 256, rand() % 256, 255);
+        //// Draw 10 random rectangles
+        //for (int i = 0; i < 10; i++) {
+        //    renderer.SetColor(nu::RandomInt(256), nu::RandomInt(256), nu::RandomInt(256), 255);
 
-            renderer.DrawRect(
-                rand() % 1180,
-                rand() % 924,
-                20 + rand() % 100,
-                20 + rand() % 100
-            );
-        }
+        //    renderer.DrawRect(
+        //        nu::RandomInt(1180),
+        //        nu::RandomInt(924),
+        //        20 + nu::RandomInt(100),
+        //        20 + nu::RandomInt(100)
+        //    );
+        //}
 
         renderer.Present();
     }
 
-	renderer.Shutdown();
+    // SHUTDOWN
+    renderer.Shutdown();
     return 0;
 };

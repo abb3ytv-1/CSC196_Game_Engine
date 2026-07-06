@@ -6,24 +6,24 @@
 
 bool nu::Renderer::Initialize(const char* name, int width, int height)
 {
-    SDL_Init(SDL_INIT_VIDEO);
+	SDL_Init(SDL_INIT_VIDEO);
 
-    m_window = SDL_CreateWindow(name, width, height, 0);
-    if (m_window == nullptr) {
-        std::cerr << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
-        SDL_Quit();
-        return 1;
-    }
+	m_window = SDL_CreateWindow(name, width, height, 0);
+	if (m_window == nullptr) {
+		std::cerr << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
+		SDL_Quit();
+		return false;
+	}
 
-    m_renderer = SDL_CreateRenderer(m_window, NULL);
+	m_renderer = SDL_CreateRenderer(m_window, NULL);
 	if (m_renderer == nullptr) {
 		std::cerr << "SDL_CreateRenderer Error: " << SDL_GetError() << std::endl;
 		SDL_DestroyWindow(m_window);
 		SDL_Quit();
-		return 1;
+		return false;
 	}
 
-    return true;
+	return true;
 }
 
 void nu::Renderer::Shutdown()
@@ -50,7 +50,7 @@ void nu::Renderer::SetColor(Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 
 void nu::Renderer::DrawPoint(float x, float y)
 {
-	SDL_RenderPoint(m_renderer, static_cast<int>(x), static_cast<int>(y));
+	SDL_RenderPoint(m_renderer, x, y);
 }
 
 void nu::Renderer::DrawFillRect(float x, float y, float w, float h) {

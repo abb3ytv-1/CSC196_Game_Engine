@@ -6,6 +6,9 @@ int main()
     nu::Renderer renderer;
     renderer.Initialize("Game Engine", 1920, 1080);
 
+    nu::Input input;
+    input.Initialize();
+
     std::vector<nu::Vector2> v;
 
     for (int i = 0; i < 3000; i++) {
@@ -23,8 +26,15 @@ int main()
             {
                 quit = true;
             }
+            if (event.type == SDL_EVENT_KEY_DOWN && event.key.scancode == SDL_SCANCODE_ESCAPE) {
+                quit = true;
+            }
         }
+        input.Update();
 
+        if (input.GetKeyPress(SDL_SCANCODE_Q)) std::cout << "pressed\n";
+        if (input.GetKeyPress(SDL_SCANCODE_Q)) std::cout << "down\n";
+        if (input.GetKeyPress(SDL_SCANCODE_Q)) std::cout << "\n";
         // RENDER
         renderer.SetColor(0, 0, 0, 255);
         renderer.Clear();
@@ -38,6 +48,9 @@ int main()
                 v[i].y
             );
         }
+
+        renderer.SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+        renderer.DrawRect(input.GetMousePotiion().x - 20, input.GetMousePotiion().y - 20, 40, 40);
 
         //// Draw 10 random lines
         //for (int i = 0; i < 10; i++) {

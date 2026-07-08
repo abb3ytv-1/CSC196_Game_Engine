@@ -1,32 +1,73 @@
 #include "pch.h"
 #include "Input.h"
 
-#include<SDL3/SDL.h>
+#include <SDL3/SDL.h>
+#include <algorithm>
 
 namespace nu {
-	bool Input::Initialize() {
-		int numKeys;
-		const bool* keyState = SDL_GetKeyboardState(&numKeys);
-		a_keyStates.resize(numKeys);
 
-		std::copy(keyState, keyState + numKeys, a_keyStates.begin());
-		a_prevKeyStates = a_keyStates;
+    bool Input::Initialize()
+    {
+        int numKeys;
+        const bool* keyState = SDL_GetKeyboardState(&numKeys);
+
+        a_keyStates.resize(numKeys);
+        a_prevKeyStates.resize(numKeys);
+
+        std::copy(
+            keyState,
+            keyState + numKeys,
+            a_keyStates.begin()
+        );
+
+        a_prevKeyStates = a_keyStates;
+
+        return true;
+    }
 
 
+    void Input::Shutdown()
+    {
+        //
+    }
 
 
-		return true;
-	}
-	void Input::Shutdown() {
-		//
-	}
+    void Input::Update()
+    {
+        // Save previous keyboard state
+        a_prevKeyStates = a_keyStates;
 
-	void Input::Update() {
-		a_prevKeyStates = a_keyStates;
-		const bool* keyState = SDL_GetKeyboardState(NULL);
-		std::copy(keyState, keyState + a_keyStates.size(), a_keyStates.begin());
-		
+        // Get current keyboard state
+        const bool* keyState = SDL_GetKeyboardState(nullptr);
 
-		a_mousePostion = SDL_GetMouseState(&a_mousePostion.x, &a_mousePostion.y);
-	}
+        std::copy(
+            keyState,
+            keyState + a_keyStates.size(),
+            a_keyStates.begin()
+        );
+
+
+        // Save previous mouse buttons
+        a_prevButtonStates = a_buttonStates;
+
+        // Get current mouse buttons
+        a_buttonStates = SDL_GetMouseState(nullptr, nullptr);
+
+
+        // Mouse position
+        float mouseX;
+        float mouseY;
+
+        SDL_GetMouseState(&mouseX, &mouseY);
+
+        a_mousePostion.x = mouseX;
+        a_mousePostion.y = mouseY;
+    }
+
+
+    uint32_t Input::GetButtonBit(MouseButton button) const
+    {
+        return SDL_BUTTON_MASK((uint32_t)button);
+    }
+
 }

@@ -4,6 +4,7 @@
 #include "Renderer.h"
 #include "Random.h"
 #include "Vector2.h"
+#include "GameTime.h"
 
 #include <SDL3/SDL.h>
 #include <iostream>

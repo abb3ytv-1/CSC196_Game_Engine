@@ -60,8 +60,8 @@ namespace nu {
 
         SDL_GetMouseState(&mouseX, &mouseY);
 
-        a_mousePostion.x = mouseX;
-        a_mousePostion.y = mouseY;
+        a_mousePosition.x = mouseX;
+        a_mousePosition.y = mouseY;
     }
 
 

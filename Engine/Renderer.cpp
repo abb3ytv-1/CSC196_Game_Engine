@@ -4,8 +4,10 @@
 
 #include <iostream>
 
+using namespace nu;
+
 // Initialize
-bool nu::Renderer::Initialize(const char* name, int width, int height)
+bool Renderer::Initialize(const char* name, int width, int height)
 {
 	SDL_Init(SDL_INIT_VIDEO);
 
@@ -30,7 +32,7 @@ bool nu::Renderer::Initialize(const char* name, int width, int height)
 }
 
 // Shutdown
-void nu::Renderer::Shutdown()
+void Renderer::Shutdown()
 {
 	SDL_DestroyRenderer(m_renderer);
 	SDL_DestroyWindow(m_window);
@@ -38,42 +40,45 @@ void nu::Renderer::Shutdown()
 }
 
 // Clear
-void nu::Renderer::Clear()
+void Renderer::Clear() const
 {
 	SDL_RenderClear(m_renderer);
 }
 
 // Present
-void nu::Renderer::Present()
+void Renderer::Present() const
 {
 	SDL_RenderPresent(m_renderer);
 }
 
 //Setcolor
-void nu::Renderer::SetColor(Uint8 r, Uint8 g, Uint8 b, Uint8 a)
+void Renderer::SetColor(Uint8 r, Uint8 g, Uint8 b, Uint8 a) const
 {
 	SDL_SetRenderDrawColor(m_renderer, r, g, b, a);
 }
 
 // Draw point
-void nu::Renderer::DrawPoint(float x, float y)
+void Renderer::DrawPoint(float x, float y) const
 {
 	SDL_RenderPoint(m_renderer, x, y);
 }
 
 // Draw Filled Rectangle
-void nu::Renderer::DrawFillRect(float x, float y, float w, float h) {
+void Renderer::DrawFillRect(float x, float y, float w, float h) const 
+{
 	SDL_FRect rect = { x, y, w, h };
 	SDL_RenderFillRect(m_renderer, &rect);
 }
 
 // Draw Rectangle Outline
-void nu::Renderer::DrawRect(float x, float y, float w, float h) {
+void Renderer::DrawRect(float x, float y, float w, float h) const
+{
 	SDL_FRect rect = { x, y, w, h };
 	SDL_RenderRect(m_renderer, &rect);
 }
 
 // Draw Line
-void nu::Renderer::DrawLine(float x1, float y1, float x2, float y2) {
+void Renderer::DrawLine(float x1, float y1, float x2, float y2) const
+{
 	SDL_RenderLine(m_renderer, x1, y1, x2, y2);
 }

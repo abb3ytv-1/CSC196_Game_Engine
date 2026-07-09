@@ -27,7 +27,7 @@ namespace nu {
 		bool GetButtonPressed(MouseButton button) const { return !GetPrevMouseDown(button) && GetMouseDown(button); }
 		bool GetButtonReleased(MouseButton button) const { return GetPrevMouseDown(button) && !GetMouseDown(button); }
 
-		Vector2 GetMousePotiion() { return a_mousePostion; }
+		Vector2 GetMousePosition() { return a_mousePosition; }
 
 	private:
 		uint32_t GetButtonBit(MouseButton button) const;
@@ -41,6 +41,6 @@ namespace nu {
 		uint32_t a_buttonStates = 0;
 		uint32_t a_prevButtonStates = 0;
 
-		nu::Vector2 a_mousePostion{ 0, 0 };
+		Vector2 a_mousePosition{ 0, 0 };
 	};
 }

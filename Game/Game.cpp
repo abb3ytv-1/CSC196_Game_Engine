@@ -1,48 +1,40 @@
 #include "../Engine/Engine.h"
 
 #include <vector>
+using namespace nu;
 
-int main()
-{
+int main() {
     // INITIALIZE
-    nu::Renderer renderer;
+    Renderer renderer;
 
-    if (!renderer.Initialize("Drawing Program", 1920, 1080))
-    {
+    if (!renderer.Initialize("Drawing Program", 1920, 1080)) {
         return 1;
     }
 
-    nu::Input input;
+    Input input;
 
-    if (!input.Initialize())
-    {
+    if (!input.Initialize()) {
         renderer.Shutdown();
         return 1;
     }
 
     // Store all recorded mouse positions
-    std::vector<nu::Vector2> points;
+    std::vector<Vector2> points;
+    std::vector<bool> startsNewShape;
 
     bool quit = false;
 
     // MAIN LOOP
-    while (!quit)
-    {
+    while (!quit) {
         // EVENTS
         SDL_Event event;
 
-        while (SDL_PollEvent(&event))
-        {
-            if (event.type == SDL_EVENT_QUIT)
-            {
+        while (SDL_PollEvent(&event)) {
+            if (event.type == SDL_EVENT_QUIT) {
                 quit = true;
             }
 
-            if (
-                event.type == SDL_EVENT_KEY_DOWN &&
-                event.key.scancode == SDL_SCANCODE_ESCAPE
-                )
-            {
+            if ( event.type == SDL_EVENT_KEY_DOWN && event.key.scancode == SDL_SCANCODE_ESCAPE ) {
                 quit = true;
             }
         }
@@ -50,25 +42,24 @@ int main()
         // UPDATE
         input.Update();
 
-        // Add points while the left mouse button is held down
-        if (input.GetMouseDown(nu::Input::MouseButton::Left))
-        {
-            nu::Vector2 position = input.GetMousePosition();
+        // Start a new shape when the mouse is first pressed
+        if (input.GetButtonPressed(Input::MouseButton::Left)) {
+            Vector2 position = input.GetMousePosition();
 
-            // Always add the first point
-            if (points.empty())
-            {
-                points.push_back(position);
-            }
-            else
-            {
-                // Find the distance between the mouse and the last point
-                nu::Vector2 difference = position - points.back();
+            points.push_back(position);
+            startsNewShape.push_back(true);
+        }
 
-                // Only add another point when the mouse has moved far enough
-                if (difference.Length() > 10.0f)
-                {
+        // Continue the current shape while the mouse is held down
+        else if (input.GetMouseDown(Input::MouseButton::Left)) {
+            Vector2 position = input.GetMousePosition();
+
+            if (!points.empty()) {
+                Vector2 difference = position - points.back();
+
+                if (difference.Length() > 10.0f) {
                     points.push_back(position);
+                    startsNewShape.push_back(false);
                 }
             }
         }
@@ -80,14 +71,16 @@ int main()
         // Draw white lines between each pair of points
         renderer.SetColor(255, 255, 255, 255);
 
-        for (size_t i = 0; i + 1 < points.size(); i++)
-        {
-            renderer.DrawLine(
-                points[i].x,
-                points[i].y,
-                points[i + 1].x,
-                points[i + 1].y
-            );
+        for (size_t i = 0; i + 1 < points.size(); i++) {
+            // Do not connect to a point that starts a new shape
+            if (!startsNewShape[i + 1]) {
+                renderer.DrawLine(
+                    points[i].x,
+                    points[i].y,
+                    points[i + 1].x,
+                    points[i + 1].y
+                );
+            }
         }
 
         renderer.Present();

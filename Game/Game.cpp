@@ -4,6 +4,7 @@
 using namespace nu;
 
 int main() {
+    
     // INITIALIZE
     Renderer renderer;
 

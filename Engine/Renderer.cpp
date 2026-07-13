@@ -9,6 +9,9 @@ using namespace nu;
 // Initialize
 bool Renderer::Initialize(const char* name, int width, int height)
 {
+	a_width = width;
+	a_height = height;
+
 	SDL_Init(SDL_INIT_VIDEO);
 
 	m_window = SDL_CreateWindow(name, width, height, 0);

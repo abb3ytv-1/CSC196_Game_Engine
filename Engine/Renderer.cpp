@@ -1,7 +1,9 @@
 #include "pch.h"
 #include "Renderer.h"
-#include <SDL3/SDL.h>
+#include "Mesh.h"
+#include "Transform.h"
 
+#include <SDL3/SDL.h>
 #include <iostream>
 
 using namespace nu;
@@ -84,4 +86,35 @@ void Renderer::DrawRect(float x, float y, float w, float h) const
 void Renderer::DrawLine(float x1, float y1, float x2, float y2) const
 {
 	SDL_RenderLine(m_renderer, x1, y1, x2, y2);
+}
+
+// Draw Model
+void Renderer::DrawModel(
+	const Mesh& model,
+	const Transform& transform
+) const {
+	const Color& color = model.GetColor();
+
+	SetColor(
+		static_cast<Uint8>(color.r * 255.0f),
+		static_cast<Uint8>(color.g * 255.0f),
+		static_cast<Uint8>(color.b * 255.0f),
+		255
+	);
+
+	const auto& points = model.GetPoints();
+
+	for (std::size_t i = 0; i + 1 < points.size(); i++) {
+		Vector2 v1 = points[i];
+		Vector2 v2 = points[i + 1];
+
+		// Convert from model space to world space
+		v1 *= transform.scale;
+		v2 *= transform.scale;
+
+		v1 += transform.position;
+		v2 += transform.position;
+
+		DrawLine(v1.x, v1.y, v2.x, v2.y);
+	}
 }

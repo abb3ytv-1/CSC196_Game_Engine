@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Transform.h"
+#include "Model.h"
 
 
 namespace nu {
@@ -8,6 +9,7 @@ namespace nu {
         public:
             Actor() = default;
             Actor(const Transform& transform) : a_transform{ transform } {}
+            Actor(const Transform& transform, const Model& model) : a_transform{transform}, a_model{model} {}
 
             void Update(float dt);
 
@@ -25,5 +27,7 @@ namespace nu {
         protected:
             Transform a_transform;
             Vector2 a_velocity{ 0,0 };
+            
+            Model a_model;
         };
  }

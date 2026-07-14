@@ -2,10 +2,11 @@
 
 #include <SDL3/SDL.h>
 
-namespace nu
-{
-    class Renderer
-    {
+namespace nu {
+    class Mesh;
+    struct Transform;
+
+    class Renderer {
     public:
         bool Initialize(const char* name, int width, int height);
         void Shutdown();
@@ -20,14 +21,24 @@ namespace nu
         void DrawRect(float x, float y, float w, float h) const;
         void DrawLine(float x1, float y1, float x2, float y2) const;
 
-        int GetHeight() const { return a_height; }
-        int GetWidth() const { return a_width; }
+        void DrawModel(
+            const Mesh& model,
+            const Transform& transform
+        ) const;
+
+        int GetHeight() const {
+            return a_height;
+        }
+
+        int GetWidth() const {
+            return a_width;
+        }
 
     private:
-        SDL_Window* m_window = nullptr;
-        SDL_Renderer* m_renderer = nullptr;
+        SDL_Window* m_window{ nullptr };
+        SDL_Renderer* m_renderer{ nullptr };
 
-        int a_width = 0;
-        int a_height = 0;
+        int a_width{ 0 };
+        int a_height{ 0 };
     };
-} 
+}

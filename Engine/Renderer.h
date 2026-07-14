@@ -1,9 +1,8 @@
-#pragma once
-
 #include <SDL3/SDL.h>
 
 namespace nu {
     class Mesh;
+    class Model;
     struct Transform;
 
     class Renderer {
@@ -21,8 +20,13 @@ namespace nu {
         void DrawRect(float x, float y, float w, float h) const;
         void DrawLine(float x1, float y1, float x2, float y2) const;
 
+        void DrawMesh(
+            const Mesh& mesh,
+            const Transform& transform
+        ) const;
+
         void DrawModel(
-            const Mesh& model,
+            const Model& model,
             const Transform& transform
         ) const;
 

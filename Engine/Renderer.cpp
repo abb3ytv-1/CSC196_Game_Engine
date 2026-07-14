@@ -2,6 +2,7 @@
 #include "Renderer.h"
 #include "Mesh.h"
 #include "Transform.h"
+#include "Model.h"
 
 #include <SDL3/SDL.h>
 #include <iostream>
@@ -89,7 +90,7 @@ void Renderer::DrawLine(float x1, float y1, float x2, float y2) const
 }
 
 // Draw Model
-void Renderer::DrawModel(
+void Renderer::DrawMesh(
 	const Mesh& model,
 	const Transform& transform
 ) const {
@@ -116,5 +117,14 @@ void Renderer::DrawModel(
 		v2 += transform.position;
 
 		DrawLine(v1.x, v1.y, v2.x, v2.y);
+	}
+}
+
+void Renderer::DrawModel(
+	const Model& model,
+	const Transform& transform
+) const {
+	for (const Mesh& mesh : model.GetMeshes()) {
+		DrawMesh(mesh, transform);
 	}
 }

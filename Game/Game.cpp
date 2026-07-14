@@ -19,8 +19,10 @@ int main() {
         return 1;
     }
 
-    Mesh mesh{ Vector2 {-3, 3 }, Vector2 { 3, 3 }, Vector2{ 0,0 }, Color{ 0.0f, 0.0f, 1.0f } };
-    Actor player{ Transform{ Vector2{ 640.0f, 512.0f }, 0.0f, 50.0f}, std::vector<Mesh>{ mesh } };
+    std::vector<Vector2> modelPoints{ Vector2{ -3.0f, 3.0f }, Vector2{ 3.0f, 3.0f }, Vector2{ 0.0f, 0.0f } };
+    Mesh mesh{ modelPoints, Color{ 0.0f, 0.0f, 1.0f } };
+    Model model{ std::vector<Mesh>{ mesh } };
+    Actor player{ Transform{ Vector2{ 640.0f, 512.0f }, 0.0f, 50.0f }, model };
 
     // Store all recorded mouse positions
     std::vector<Vector2> points;

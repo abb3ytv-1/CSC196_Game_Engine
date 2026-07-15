@@ -11,9 +11,8 @@ namespace nu {
             Actor(const Transform& transform) : a_transform{ transform } {}
             Actor(const Transform& transform, const Model& model) : a_transform{transform}, a_model{model} {}
 
-            void Update(float dt);
-
-            void Draw(const class Renderer& renderer);
+            virtual void Update(float dt);
+            virtual void Draw(const class Renderer& renderer) const;
 
             const Transform& GetTransform() { return a_transform; }
             void SetPosition(const Vector2& position) { a_transform.position = position; }

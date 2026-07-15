@@ -8,9 +8,31 @@
 #include "GameTime.h"
 #include "MathUtils.h"
 #include "Transform.h"
+#include "Actor.h"
 
 #include <SDL3/SDL.h>
 #include <iostream>
 #include <vector>
 
-#include "Actor.h"
+
+namespace nu {
+	class Engine {
+	public:
+		Engine() = default;
+
+		bool Initialize();
+		void Shutdown();
+		void Update();
+
+		Input& GetInput() { return a_input; }
+		Renderer& GetRenderer() { return a_renderer; }
+		Time& GetTime() { return a_time; }
+
+	private:
+		Input a_input;
+		Renderer a_renderer;
+		Time a_time;
+	};
+
+	extern Engine engine;
+}

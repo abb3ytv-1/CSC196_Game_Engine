@@ -6,46 +6,14 @@ using namespace nu;
 
 int main() {
 	// INITIALIZE
-	Renderer renderer;
-
-	if (!renderer.Initialize("Game Engine", 1920, 1080)) {
-		return 1;
-	}
-
-	Input input;
-
-	if (!input.Initialize()) {
-		renderer.Shutdown();
-		return 1;
-	}
-
-	Time time;
+	engine.Initialize();
 
 	// Character model
-	std::vector<Vector2> modelPoints{
-		Vector2{ -3.0f, 3.0f },
-		Vector2{ 3.0f, 3.0f },
-		Vector2{ 0.0f, -3.0f },
-		Vector2{ -3.0f, 3.0f }
-	};
+	std::vector<Vector2> modelPoints{ Vector2{ -3.0f, 3.0f }, Vector2{ 3.0f, 3.0f }, Vector2{ 0.0f, -3.0f }, Vector2{ -3.0f, 3.0f } };
 
-	Mesh mesh{
-		modelPoints,
-		Color{ 0.0f, 0.0f, 1.0f }
-	};
-
-	Model model{
-		std::vector<Mesh>{ mesh }
-	};
-
-	Actor player{
-		Transform{
-			Vector2{ 640.0f, 512.0f },
-			0.0f,
-			50.0f
-		},
-		model
-	};
+	Mesh mesh{ modelPoints, Color{ 0.0f, 0.0f, 1.0f } };
+	Model model{ std::vector<Mesh>{ mesh } };
+	Actor player{ Transform{ Vector2 { 640.0f, 512.0f }, 0.0f, 50.0f }, model };
 
 	// Store recorded mouse positions
 	std::vector<Vector2> points;
@@ -63,71 +31,29 @@ int main() {
 				quit = true;
 			}
 
-			if (
-				event.type == SDL_EVENT_KEY_DOWN &&
-				event.key.scancode == SDL_SCANCODE_ESCAPE
-				) {
+			if ( event.type == SDL_EVENT_KEY_DOWN && event.key.scancode == SDL_SCANCODE_ESCAPE ) {
 				quit = true;
 			}
 		}
 
-		// UPDATE
-		input.Update();
-		time.Tick();
+		// engine
+		engine.Update();
 
-		float dt = time.GetDeltaTime();
-
-		// Character movement
-		Vector2 direction{ 0.0f, 0.0f };
-
-		if (
-			input.GetKeyDown(SDL_SCANCODE_W) ||
-			input.GetKeyDown(SDL_SCANCODE_UP)
-			) {
-			direction.y -= 1.0f;
-		}
-
-		if (
-			input.GetKeyDown(SDL_SCANCODE_S) ||
-			input.GetKeyDown(SDL_SCANCODE_DOWN)
-			) {
-			direction.y += 1.0f;
-		}
-
-		if (
-			input.GetKeyDown(SDL_SCANCODE_A) ||
-			input.GetKeyDown(SDL_SCANCODE_LEFT)
-			) {
-			direction.x -= 1.0f;
-		}
-
-		if (
-			input.GetKeyDown(SDL_SCANCODE_D) ||
-			input.GetKeyDown(SDL_SCANCODE_RIGHT)
-			) {
-			direction.x += 1.0f;
-		}
-
-		float movementSpeed = 300.0f;
-
-		if (direction.LengthSqr() > 0.0f) {
-			direction = direction.Normalized();
-		}
-
-		player.SetVelocity(direction * movementSpeed);
-		player.Update(dt);
+		player.SetRotation(player.GetTransform().rotation + (90.0f * engine.GetTime().GetDeltaTime()));
+		player.Update(engine.GetTime().GetDeltaTime());
+		float dt = engine.GetTime().GetDeltaTime();
 
 		// Start a new drawing
-		if (input.GetButtonPressed(Input::MouseButton::Left)) {
-			Vector2 position = input.GetMousePosition();
+		if (engine.GetInput().GetButtonPressed(Input::MouseButton::Left)) {
+			Vector2 position = engine.GetInput().GetMousePosition();
 
 			points.push_back(position);
 			startsNewShape.push_back(true);
 		}
 
 		// Continue drawing while the mouse is held
-		else if (input.GetMouseDown(Input::MouseButton::Left)) {
-			Vector2 position = input.GetMousePosition();
+		else if (engine.GetInput().GetMouseDown(Input::MouseButton::Left)) {
+			Vector2 position = engine.GetInput().GetMousePosition();
 
 			if (!points.empty()) {
 				Vector2 difference = position - points.back();
@@ -164,8 +90,8 @@ int main() {
 	}
 
 	// SHUTDOWN
-	input.Shutdown();
-	renderer.Shutdown();
+	engine.GetInput().Shutdown();
+	engine.GetRenderer().Shutdown();
 
 	return 0;
 }

@@ -5,6 +5,9 @@ namespace nu {
 	constexpr float TwoPi = 6.283185307179586476925286766559f;
 	constexpr float HalfPi = 1.5707963267948966192313216916398f;
 
+	constexpr float RadToDeg = 180.0f / Pi;
+	constexpr float DegToRad = Pi / 180.0f ;
+
 	template<typename T>
 	T Min(T a, T b) {
 		return (a < b) ? a : b;

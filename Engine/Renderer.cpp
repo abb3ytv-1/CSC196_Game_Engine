@@ -3,6 +3,7 @@
 #include "Mesh.h"
 #include "Transform.h"
 #include "Model.h"
+#include "MathUtils.h"
 
 #include <SDL3/SDL.h>
 #include <iostream>
@@ -89,11 +90,10 @@ void Renderer::DrawLine(float x1, float y1, float x2, float y2) const
 	SDL_RenderLine(m_renderer, x1, y1, x2, y2);
 }
 
+
+
 // Draw Model
-void Renderer::DrawMesh(
-	const Mesh& model,
-	const Transform& transform
-) const {
+void Renderer::DrawMesh( const Mesh& model, const Transform& transform ) const { 
 	const Color& color = model.GetColor();
 
 	SetColor(
@@ -113,6 +113,9 @@ void Renderer::DrawMesh(
 		v1 *= transform.scale;
 		v2 *= transform.scale;
 
+		v1 = v1.Rotate(transform.rotation * DegToRad);
+		v2 = v2.Rotate(transform.rotation * DegToRad);
+
 		v1 += transform.position;
 		v2 += transform.position;
 
@@ -120,11 +123,3 @@ void Renderer::DrawMesh(
 	}
 }
 
-void Renderer::DrawModel(
-	const Model& model,
-	const Transform& transform
-) const {
-	for (const Mesh& mesh : model.GetMeshes()) {
-		DrawMesh(mesh, transform);
-	}
-}

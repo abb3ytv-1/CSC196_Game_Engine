@@ -1,23 +1,32 @@
 #include "pch.h"
 #include "Engine.h"
-#include "framework.h"
-#include <iostream>
 
 namespace nu {
+	// Defines the global engine declared with extern in Engine.h
 	Engine engine;
 
-	bool Engine::Initialize(){
-		a_renderer.Initialize("Game Engine", 1920, 1080);
-		a_input.Initialize();
+	bool Engine::Initialize() {
+		if (!a_renderer.Initialize("Game Engine", 1920, 1080)) {
+			return false;
+		}
 
+		if (!a_input.Initialize()) {
+			a_renderer.Shutdown();
+			return false;
+		}
+
+		a_time.Reset();
+
+		return true;
 	}
 
 	void Engine::Shutdown() {
+		a_input.Shutdown();
 		a_renderer.Shutdown();
 	}
-		
-	void nu::Engine::Update() {
-		a_input.GetInput();
-		a_time.GetTime();
+
+	void Engine::Update() {
+		a_input.Update();
+		a_time.Tick();
 	}
 }

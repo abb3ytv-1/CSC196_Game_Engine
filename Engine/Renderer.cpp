@@ -93,8 +93,15 @@ void Renderer::DrawLine(float x1, float y1, float x2, float y2) const
 
 
 // Draw Model
-void Renderer::DrawMesh( const Mesh& model, const Transform& transform ) const { 
-	const Color& color = model.GetColor();
+void Renderer::DrawModel( const Model& model, const Transform& transform) const {
+	for (const Mesh& mesh : model.GetMeshes()) {
+		DrawMesh(mesh, transform);
+	}
+}
+
+
+void Renderer::DrawMesh( const Mesh& mesh, const Transform& transform ) const { 
+	const Color& color = mesh.GetColor();
 
 	SetColor(
 		static_cast<Uint8>(color.r * 255.0f),
@@ -103,7 +110,7 @@ void Renderer::DrawMesh( const Mesh& model, const Transform& transform ) const {
 		255
 	);
 
-	const auto& points = model.GetPoints();
+	const auto& points = mesh.GetPoints();
 
 	for (std::size_t i = 0; i + 1 < points.size(); i++) {
 		Vector2 v1 = points[i];

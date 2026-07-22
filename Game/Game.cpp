@@ -13,6 +13,15 @@ int main() {
 	Renderer& renderer = engine.GetRenderer();
 	Input& input = engine.GetInput();
 
+	// Audio
+	AudioSystem& audio = engine.GetAudio();
+
+	audio.LoadSound("sfx/kick.wav");
+	audio.LoadSound("sfx/snare.wav");
+	audio.LoadSound("sfx/clap.wav");
+	audio.LoadSound("sfx/hihat.wav");
+	audio.LoadSound("sfx/cowbell.wav");
+
 	// Fish body
 	std::vector<Vector2> bodyPoints{
 		Vector2{ -6.0f, 0.0f },
@@ -128,6 +137,27 @@ int main() {
 
 		// UPDATE ENGINE
 		engine.Update();
+
+		// Audio
+		if (input.GetKeyPress(SDL_SCANCODE_1)) {
+			audio.PlaySound(0);
+		}
+
+		if (input.GetKeyPress(SDL_SCANCODE_2)) {
+			audio.PlaySound(1);
+		}
+
+		if (input.GetKeyPress(SDL_SCANCODE_3)) {
+			audio.PlaySound(2);
+		}
+
+		if (input.GetKeyPress(SDL_SCANCODE_4)) {
+			audio.PlaySound(3);
+		}
+
+		if (input.GetKeyPress(SDL_SCANCODE_5)) {
+			audio.PlaySound(4);
+		}
 
 		float dt = engine.GetTime().GetDeltaTime();
 

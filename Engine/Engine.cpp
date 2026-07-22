@@ -15,12 +15,19 @@ namespace nu {
 			return false;
 		}
 
+		if (!a_audio.Initialize()) {
+			a_input.Shutdown();
+			a_renderer.Shutdown();
+			return false;
+		}
+
 		a_time.Reset();
 
 		return true;
 	}
 
 	void Engine::Shutdown() {
+		a_audio.Shutdown();
 		a_input.Shutdown();
 		a_renderer.Shutdown();
 	}
@@ -28,5 +35,6 @@ namespace nu {
 	void Engine::Update() {
 		a_input.Update();
 		a_time.Tick();
+		a_audio.Update();
 	}
 }

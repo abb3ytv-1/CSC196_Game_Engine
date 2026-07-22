@@ -9,6 +9,7 @@
 #include "MathUtils.h"
 #include "Transform.h"
 #include "Actor.h"
+#include "AudioSystem.h"
 
 #include <SDL3/SDL.h>
 #include <iostream>
@@ -28,10 +29,13 @@ namespace nu {
 		Renderer& GetRenderer() { return a_renderer; }
 		Time& GetTime() { return a_time; }
 
+		AudioSystem& GetAudio() { return a_audio; }
+
 	private:
 		Input a_input;
 		Renderer a_renderer;
 		Time a_time;
+		AudioSystem a_audio;
 	};
 
 	extern Engine engine;

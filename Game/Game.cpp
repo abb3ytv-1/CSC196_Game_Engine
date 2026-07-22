@@ -16,10 +16,10 @@ int main() {
 	// Audio
 	AudioSystem& audio = engine.GetAudio();
 
-	audio.LoadSound("sfx/kick.wav");
+	audio.LoadSound("sfx/bass.wav");
 	audio.LoadSound("sfx/snare.wav");
 	audio.LoadSound("sfx/clap.wav");
-	audio.LoadSound("sfx/hihat.wav");
+	audio.LoadSound("sfx/open-hat.wav");
 	audio.LoadSound("sfx/cowbell.wav");
 
 	// Fish body

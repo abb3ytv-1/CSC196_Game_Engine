@@ -6,7 +6,7 @@
 
 namespace nu {
 	bool AudioSystem::Initialize() {
-		FMOD_RESULT result = FMOD::Sysyem_Create(&a_audio);
+		FMOD_RESULT result = FMOD::System_Create(&a_audio);
 
 		if (result != FMOD_OK) {
 			std::cerr
@@ -19,7 +19,7 @@ namespace nu {
 
 		void* extradriverdata = nullptr;
 
-		result a_audio->init(
+		result = a_audio->init(
 			32,
 			FMOD_INIT_NORMAL,
 			extradriverdata

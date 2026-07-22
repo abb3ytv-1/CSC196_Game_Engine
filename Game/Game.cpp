@@ -161,33 +161,43 @@ int main() {
 
 		float dt = engine.GetTime().GetDeltaTime();
 
+		// Rotate Actor with arrow keys
+		float rotation = player.GetTransform().rotation;
+		float rotationSpeed = 180.0f;
+
+		if (input.GetKeyDown(SDL_SCANCODE_LEFT)) {
+			rotation -= rotationSpeed * dt;
+		}
+
+		if (input.GetKeyDown(SDL_SCANCODE_RIGHT)) {
+			rotation += rotationSpeed * dt;
+		}
+
+		player.SetRotation(rotation);
+
 		// Character movement
 		Vector2 direction{ 0.0f, 0.0f };
 
 		if (
-			input.GetKeyDown(SDL_SCANCODE_W) ||
-			input.GetKeyDown(SDL_SCANCODE_UP)
+			input.GetKeyDown(SDL_SCANCODE_W)
 			) {
 			direction.y -= 1.0f;
 		}
 
 		if (
-			input.GetKeyDown(SDL_SCANCODE_S) ||
-			input.GetKeyDown(SDL_SCANCODE_DOWN)
+			input.GetKeyDown(SDL_SCANCODE_S)
 			) {
 			direction.y += 1.0f;
 		}
 
 		if (
-			input.GetKeyDown(SDL_SCANCODE_A) ||
-			input.GetKeyDown(SDL_SCANCODE_LEFT)
+			input.GetKeyDown(SDL_SCANCODE_A)
 			) {
 			direction.x -= 1.0f;
 		}
 
 		if (
-			input.GetKeyDown(SDL_SCANCODE_D) ||
-			input.GetKeyDown(SDL_SCANCODE_RIGHT)
+			input.GetKeyDown(SDL_SCANCODE_D)
 			) {
 			direction.x += 1.0f;
 		}
@@ -200,12 +210,6 @@ int main() {
 
 		player.SetVelocity(direction * movementSpeed);
 		player.Update(dt);
-
-		// This was added in class, so it can stay.
-		// Leave it commented while taking the right-facing screenshot.
-		// player.SetRotation(
-		// 	player.GetTransform().rotation + (90.0f * dt)
-		// );
 
 		// Start a new mouse drawing
 		if (input.GetButtonPressed(Input::MouseButton::Left)) {

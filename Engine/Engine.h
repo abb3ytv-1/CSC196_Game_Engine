@@ -10,6 +10,7 @@
 #include "Transform.h"
 #include "Actor.h"
 #include "AudioSystem.h"
+#include "File.h"
 
 #include <SDL3/SDL.h>
 #include <iostream>

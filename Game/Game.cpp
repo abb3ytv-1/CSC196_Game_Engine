@@ -1,5 +1,7 @@
 #include "../Engine/Engine.h"
 
+#include <iostream>
+#include <string>
 #include <vector>
 
 using namespace nu;
@@ -13,14 +15,89 @@ int main() {
 	Renderer& renderer = engine.GetRenderer();
 	Input& input = engine.GetInput();
 
+	// Get current working directory
+	std::cout << "Directory Operations:\n";
+	std::cout
+		<< "Working directory: "
+		<< GetWorkingDirectory()
+		<< '\n';
+
+	// Change from Build to Build/Assets
+	std::cout << "Setting directory to 'Assets'...\n";
+
+	if (!SetWorkingDirectory("Assets")) {
+		std::cerr << "Could not open the Assets directory.\n";
+		engine.Shutdown();
+		return 1;
+	}
+
+	std::cout
+		<< "New directory: "
+		<< GetWorkingDirectory()
+		<< "\n\n";
+
+	// Get files in Assets
+	std::cout << "Files in Directory:\n";
+
+	auto filenames =
+		GetFilesInDirectory(GetWorkingDirectory());
+
+	for (const auto& filename : filenames) {
+		std::cout << filename << '\n';
+	}
+
+	std::cout << '\n';
+
+	// Display filename information
+	if (!filenames.empty()) {
+		std::string value = GetFilename(filenames[0]);
+		std::cout << "Filename: " << value << '\n';
+
+		value = GetFileExtension(filenames[0]);
+		std::cout << "Extension: " << value << '\n';
+
+		value = GetFilenameNoExtension(filenames[0]);
+		std::cout
+			<< "Filename No Extension: "
+			<< value
+			<< "\n\n";
+	}
+
+	// Read test.txt
+	std::cout << "Text File Reading:\n";
+
+	std::string text;
+
+	if (ReadTextFile("test.txt", text)) {
+		std::cout << text << '\n';
+	}
+	else {
+		std::cerr << "Could not read test.txt\n";
+	}
+
+	// Append to test.txt
+	std::cout << "Text File Writing:\n";
+
+	WriteTextFile(
+		"test.txt",
+		"\nHello, World!",
+		true
+	);
+
+	if (ReadTextFile("test.txt", text)) {
+		std::cout << text << '\n';
+	}
+
 	// Audio
 	AudioSystem& audio = engine.GetAudio();
 
-	audio.LoadSound("sfx/bass.wav");
-	audio.LoadSound("sfx/snare.wav");
-	audio.LoadSound("sfx/clap.wav");
-	audio.LoadSound("sfx/open-hat.wav");
-	audio.LoadSound("sfx/cowbell.wav");
+	audio.LoadSound("bass.wav");
+	audio.LoadSound("snare.wav");
+	audio.LoadSound("clap.wav");
+	audio.LoadSound("open-hat.wav");
+	audio.LoadSound("cowbell.wav");
+
+	// Keep the remainder of your Game.cpp here.
 
 	// Fish body
 	std::vector<Vector2> bodyPoints{

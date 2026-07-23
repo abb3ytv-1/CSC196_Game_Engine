@@ -1,6 +1,16 @@
 #include "Player.h"
 #include "Renderer.h"
 #include "engine.h"
+#include "Assets.h"
+#include "Bullet.h"
+
+/*
+* Things to add:
+* - Movement
+* - Rotate
+* - Bullet
+* - bullet descripton
+*/
 
 void Player::Update(float dt) {
 

@@ -4,9 +4,16 @@
 #include "MathUtils.h"
 
 namespace nu {
+	/*
+	* Thigs to add
+	* - lifespan
+	*/
+
 	void Actor::Update(float dt) {
+
+		// Physics
 		a_transform.position += (a_velocity * dt);
-		a_velocity *= 0.997f;
+		a_velocity *= (1.0f / ((1.6f) + a_damping * dt));
 
 		a_transform.position.x = Wrap(
 			0.0f,

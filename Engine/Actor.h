@@ -6,15 +6,29 @@
 
 namespace nu {
     class Actor {
+
+        /*
+        * Actor description:
+        * - name
+        * - model
+        * - transform
+        * - speed
+        * - damping
+        * - velocity
+        * - tag
+        * - lifespan
+        */ 
+        
+
         public:
-            Actor() = default;
+            virtual ~Actor() = default;
             Actor(const Transform& transform) : a_transform{ transform } {}
             Actor(const Transform& transform, const Model& model) : a_transform{transform}, a_model{model} {}
 
             virtual void Update(float dt);
             virtual void Draw(const class Renderer& renderer) const;
 
-            const Transform& GetTransform() { return a_transform; }
+            const Transform& GetTransform() const { return a_transform; }
             void SetPosition(const Vector2& position) { a_transform.position = position; }
             void SetRotation(float rotation) { a_transform.rotation = rotation; }
             void SetScale(float scale) { a_transform.scale = scale; }

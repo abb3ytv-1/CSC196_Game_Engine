@@ -7,6 +7,21 @@
 using namespace nu;
 
 int main() {
+	/*
+	* Thigs to add
+	* - bullets.h
+	* - bullets.cpp
+	* - comments explaining what the code does
+	* - enemy description
+	* - add pending actors
+	* - update actors
+	* - remove destroyed actors
+	* 
+	* 
+	* Make an audio systems class
+	* CLEAN UP CODE - get rid of unused/commented code that is not importaint
+	*/
+
 	// INITIALIZE
 	if (!engine.Initialize()) {
 		return 1;
@@ -183,7 +198,7 @@ int main() {
 		Transform{
 			Vector2{ 960.0f, 540.0f },
 			0.0f,
-			30.0f
+			10.0f
 		},
 		fishModel
 	};

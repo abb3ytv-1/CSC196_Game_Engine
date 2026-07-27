@@ -24,7 +24,7 @@ namespace nu {
 		}
 
 	private:
-		const Actor* a_target = nullprt;
+		const Actor* a_target = nullptr;
 		float a_speed = 100.0f;
 	};
 }

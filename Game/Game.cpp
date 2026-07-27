@@ -1,4 +1,5 @@
 #include "../Engine/Engine.h"
+#include "../Engine/Enemy.h"
 
 #include <iostream>
 #include <string>
@@ -8,18 +9,14 @@ using namespace nu;
 
 int main() {
 	/*
-	* Thigs to add
-	* - bullets.h
-	* - bullets.cpp
-	* - comments explaining what the code does
-	* - enemy description
-	* - add pending actors
-	* - update actors
-	* - remove destroyed actors
-	* 
-	* 
-	* Make an audio systems class
-	* CLEAN UP CODE - get rid of unused/commented code that is not importaint
+	* Things to add later:
+	* - Bullets
+	* - Scene class
+	* - Pending actors
+	* - Update actors through Scene
+	* - Remove destroyed actors
+	* - Actor lifespan
+	* - More comments and code cleanup
 	*/
 
 	// INITIALIZE
@@ -29,6 +26,8 @@ int main() {
 
 	Renderer& renderer = engine.GetRenderer();
 	Input& input = engine.GetInput();
+
+	// FILESYSTEM TESTING
 
 	// Get current working directory
 	std::cout << "Directory Operations:\n";
@@ -103,7 +102,8 @@ int main() {
 		std::cout << text << '\n';
 	}
 
-	// Audio
+	// AUDIO
+
 	AudioSystem& audio = engine.GetAudio();
 
 	audio.LoadSound("bass.wav");
@@ -112,7 +112,7 @@ int main() {
 	audio.LoadSound("open-hat.wav");
 	audio.LoadSound("cowbell.wav");
 
-	// Keep the remainder of your Game.cpp here.
+	// PLAYER MODEL
 
 	// Fish body
 	std::vector<Vector2> bodyPoints{
@@ -159,7 +159,7 @@ int main() {
 		Vector2{ 4.0f, -1.0f }
 	};
 
-	// Create meshes with different colors
+	// Create the player meshes
 	Mesh bodyMesh{
 		bodyPoints,
 		Color{ 0.45f, 0.85f, 0.80f }
@@ -185,7 +185,7 @@ int main() {
 		Color{ 1.0f, 1.0f, 1.0f }
 	};
 
-	// Add all meshes to the model
+	// Add the meshes to the player model
 	Model fishModel;
 
 	fishModel.AddMesh(bodyMesh);
@@ -193,6 +193,45 @@ int main() {
 	fishModel.AddMesh(topFinMesh);
 	fishModel.AddMesh(sideFinMesh);
 	fishModel.AddMesh(eyeMesh);
+
+	// ENEMY MODEL
+
+	// The enemies use the same points but have different colors
+	Mesh enemyBodyMesh{
+		bodyPoints,
+		Color{ 1.0f, 0.2f, 0.2f }
+	};
+
+	Mesh enemyTailMesh{
+		tailPoints,
+		Color{ 0.7f, 0.0f, 0.0f }
+	};
+
+	Mesh enemyTopFinMesh{
+		topFinPoints,
+		Color{ 0.8f, 0.1f, 0.1f }
+	};
+
+	Mesh enemySideFinMesh{
+		sideFinPoints,
+		Color{ 0.6f, 0.0f, 0.0f }
+	};
+
+	Mesh enemyEyeMesh{
+		eyePoints,
+		Color{ 0.0f, 0.0f, 0.0f }
+	};
+
+	// Add the enemy meshes to the enemy model
+	Model enemyModel;
+
+	enemyModel.AddMesh(enemyBodyMesh);
+	enemyModel.AddMesh(enemyTailMesh);
+	enemyModel.AddMesh(enemyTopFinMesh);
+	enemyModel.AddMesh(enemySideFinMesh);
+	enemyModel.AddMesh(enemyEyeMesh);
+
+	// CREATE PLAYER
 
 	Actor player{
 		Transform{
@@ -202,6 +241,43 @@ int main() {
 		},
 		fishModel
 	};
+
+	// CREATE ENEMIES
+
+	std::vector<Enemy> enemies{
+		Enemy{
+			Transform{
+				Vector2{ 200.0f, 200.0f },
+				0.0f,
+				8.0f
+			},
+			enemyModel,
+			100.0f
+		},
+		Enemy{
+			Transform{
+				Vector2{ 1700.0f, 300.0f },
+				0.0f,
+				8.0f
+			},
+			enemyModel,
+			125.0f
+		},
+		Enemy{
+			Transform{
+				Vector2{ 400.0f, 900.0f },
+				0.0f,
+				8.0f
+			},
+			enemyModel,
+			75.0f
+		}
+	};
+
+	// Give every enemy the player as its target
+	for (Enemy& enemy : enemies) {
+		enemy.SetTarget(player);
+	}
 
 	// Store recorded mouse positions
 	std::vector<Vector2> points;
@@ -230,7 +306,10 @@ int main() {
 		// UPDATE ENGINE
 		engine.Update();
 
-		// Audio
+		float dt = engine.GetTime().GetDeltaTime();
+
+		// AUDIO INPUT
+
 		if (input.GetKeyPress(SDL_SCANCODE_1)) {
 			audio.PlaySound(0);
 		}
@@ -251,9 +330,8 @@ int main() {
 			audio.PlaySound(4);
 		}
 
-		float dt = engine.GetTime().GetDeltaTime();
+		// PLAYER ROTATION
 
-		// Rotate Actor with arrow keys
 		float rotation = player.GetTransform().rotation;
 		float rotationSpeed = 180.0f;
 
@@ -267,30 +345,23 @@ int main() {
 
 		player.SetRotation(rotation);
 
-		// Character movement
+		// PLAYER MOVEMENT
+
 		Vector2 direction{ 0.0f, 0.0f };
 
-		if (
-			input.GetKeyDown(SDL_SCANCODE_W)
-			) {
+		if (input.GetKeyDown(SDL_SCANCODE_W)) {
 			direction.y -= 1.0f;
 		}
 
-		if (
-			input.GetKeyDown(SDL_SCANCODE_S)
-			) {
+		if (input.GetKeyDown(SDL_SCANCODE_S)) {
 			direction.y += 1.0f;
 		}
 
-		if (
-			input.GetKeyDown(SDL_SCANCODE_A)
-			) {
+		if (input.GetKeyDown(SDL_SCANCODE_A)) {
 			direction.x -= 1.0f;
 		}
 
-		if (
-			input.GetKeyDown(SDL_SCANCODE_D)
-			) {
+		if (input.GetKeyDown(SDL_SCANCODE_D)) {
 			direction.x += 1.0f;
 		}
 
@@ -302,6 +373,14 @@ int main() {
 
 		player.SetVelocity(direction * movementSpeed);
 		player.Update(dt);
+
+		// UPDATE ENEMIES
+
+		for (Enemy& enemy : enemies) {
+			enemy.Update(dt);
+		}
+
+		// MOUSE DRAWING
 
 		// Start a new mouse drawing
 		if (input.GetButtonPressed(Input::MouseButton::Left)) {
@@ -316,7 +395,8 @@ int main() {
 			Vector2 position = input.GetMousePosition();
 
 			if (!points.empty()) {
-				Vector2 difference = position - points.back();
+				Vector2 difference =
+					position - points.back();
 
 				if (difference.Length() > 10.0f) {
 					points.push_back(position);
@@ -326,13 +406,14 @@ int main() {
 		}
 
 		// RENDER
+
 		renderer.SetColor(0, 0, 0, 255);
 		renderer.Clear();
 
 		// Draw mouse lines
 		renderer.SetColor(255, 255, 255, 255);
 
-		for (size_t i = 0; i + 1 < points.size(); i++) {
+		for (std::size_t i = 0; i + 1 < points.size(); i++) {
 			if (!startsNewShape[i + 1]) {
 				renderer.DrawLine(
 					points[i].x,
@@ -343,8 +424,13 @@ int main() {
 			}
 		}
 
-		// Draw the fish model
+		// Draw the player
 		player.Draw(renderer);
+
+		// Draw the enemies
+		for (const Enemy& enemy : enemies) {
+			enemy.Draw(renderer);
+		}
 
 		renderer.Present();
 	}

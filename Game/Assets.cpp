@@ -1,14 +1,11 @@
-/* What needs to go in here
-* 
-* Bullets mesh
-*/
+#include "Assets.h"
 
-Mesh bulletMesh{
-  {
-	Vector2{ -1, -1 },
-	Vector2{ 1, 0 },
-	Vector2{ -1, 1 },
-	Vector2{ -1, -1 },
-  },
-  Color{ 1.0f, 0.0f, 0.0f }
+nu::Mesh bulletMesh{
+	{
+		nu::Vector2{ -1.0f, -1.0f },
+		nu::Vector2{ 1.0f, 0.0f },
+		nu::Vector2{ -1.0f, 1.0f },
+		nu::Vector2{ -1.0f, -1.0f }
+	},
+	nu::Color{ 1.0f, 0.0f, 0.0f }
 };

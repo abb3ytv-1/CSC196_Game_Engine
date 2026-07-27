@@ -11,6 +11,7 @@
 #include "Actor.h"
 #include "AudioSystem.h"
 #include "File.h"
+#include "Enemy.h"
 
 #include <SDL3/SDL.h>
 #include <iostream>

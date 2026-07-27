@@ -21,6 +21,7 @@ namespace nu {
         
 
         public:
+            Actor() = default;
             virtual ~Actor() = default;
             Actor(const Transform& transform) : a_transform{ transform } {}
             Actor(const Transform& transform, const Model& model) : a_transform{transform}, a_model{model} {}
@@ -40,6 +41,7 @@ namespace nu {
         protected:
             Transform a_transform;
             Vector2 a_velocity{ 0,0 };
+            float a_damping = 1.0f;
             
             Model a_model;
         };

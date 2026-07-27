@@ -7,7 +7,17 @@ namespace nu {
 	public:
 		Enemy() = default;
 
-		Enemy( const Transform& transform, const Model& model, float speed = 100.0f ) : Actor{ transform, model }, a_speed{ speed } {}
+		Enemy(
+			const Transform& transform,
+			const Model& model,
+			float speed = 100.0f
+		) :
+			Actor{ transform, model },
+			a_speed{ speed }
+		{
+			// This is multiplied by the enemy's scale.
+			SetCollisionRadius(8.0f);
+		}
 
 		void Update(float dt) override;
 

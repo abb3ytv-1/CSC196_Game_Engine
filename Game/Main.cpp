@@ -1,8 +1,9 @@
 #include "../Engine/Engine.h"
 
-#include <iostream>
+#include "Assets.h"
+#include "Bullet.h"
+
 #include <memory>
-#include <string>
 #include <vector>
 
 using namespace nu;
@@ -10,8 +11,6 @@ using namespace nu;
 int main() {
 	/*
 	* Things to add later:
-	* - Bullet class
-	* - Player shooting
 	* - Enemy collisions
 	* - Actor tags
 	* - Additional scene management
@@ -27,86 +26,11 @@ int main() {
 	Input& input = engine.GetInput();
 	AudioSystem& audio = engine.GetAudio();
 
-	// FILESYSTEM TESTING
-
-	std::cout << "Directory Operations:\n";
-	std::cout
-		<< "Working directory: "
-		<< GetWorkingDirectory()
-		<< '\n';
-
-	std::cout << "Setting directory to 'Assets'...\n";
+	// Set the working directory so audio files can be found.
 
 	if (!SetWorkingDirectory("Assets")) {
-		std::cerr
-			<< "Could not open the Assets directory.\n";
-
 		engine.Shutdown();
 		return 1;
-	}
-
-	std::cout
-		<< "New directory: "
-		<< GetWorkingDirectory()
-		<< "\n\n";
-
-	std::cout << "Files in Directory:\n";
-
-	auto filenames =
-		GetFilesInDirectory(GetWorkingDirectory());
-
-	for (const auto& filename : filenames) {
-		std::cout << filename << '\n';
-	}
-
-	std::cout << '\n';
-
-	if (!filenames.empty()) {
-		std::string value =
-			GetFilename(filenames[0]);
-
-		std::cout
-			<< "Filename: "
-			<< value
-			<< '\n';
-
-		value = GetFileExtension(filenames[0]);
-
-		std::cout
-			<< "Extension: "
-			<< value
-			<< '\n';
-
-		value =
-			GetFilenameNoExtension(filenames[0]);
-
-		std::cout
-			<< "Filename No Extension: "
-			<< value
-			<< "\n\n";
-	}
-
-	std::cout << "Text File Reading:\n";
-
-	std::string text;
-
-	if (ReadTextFile("test.txt", text)) {
-		std::cout << text << '\n';
-	}
-	else {
-		std::cerr << "Could not read test.txt\n";
-	}
-
-	std::cout << "Text File Writing:\n";
-
-	WriteTextFile(
-		"test.txt",
-		"\nHello, World!",
-		true
-	);
-
-	if (ReadTextFile("test.txt", text)) {
-		std::cout << text << '\n';
 	}
 
 	// AUDIO
@@ -229,6 +153,11 @@ int main() {
 	enemyModel.AddMesh(enemySideFinMesh);
 	enemyModel.AddMesh(enemyEyeMesh);
 
+	// BULLET MODEL
+
+	Model bulletModel;
+	bulletModel.AddMesh(bulletMesh);
+
 	// SCENE AND ACTORS
 
 	Scene scene;
@@ -245,6 +174,9 @@ int main() {
 	// Keep a non-owning pointer for input and enemy targets.
 	// Scene owns the actual Actor.
 	Actor* player = playerActor.get();
+
+	// The player's model-space collision radius.
+	player->SetCollisionRadius(8.0f);
 
 	scene.AddActor(std::move(playerActor));
 
@@ -361,6 +293,43 @@ int main() {
 
 		player->SetRotation(rotation);
 
+		// PLAYER SHOOTING
+
+		if (input.GetKeyPress(SDL_SCANCODE_SPACE)) {
+			// The fish model faces toward positive x.
+			Vector2 forward{ 1.0f, 0.0f };
+
+			// Rotate forward so that it matches
+			// the direction the player is facing.
+			forward = forward.Rotate(
+				rotation * DegToRad
+			);
+
+			// Spawn the bullet in front of the player.
+			float spawnDistance =
+				player->GetCollisionRadius() +
+				10.0f;
+
+			Vector2 bulletPosition =
+				player->GetTransform().position +
+				(forward * spawnDistance);
+
+			auto bullet =
+				std::make_unique<Bullet>(
+					Transform{
+						bulletPosition,
+						rotation,
+						4.0f
+					},
+					bulletModel,
+					700.0f,
+					2.0f
+				);
+
+			// Scene takes ownership of the bullet.
+			scene.AddActor(std::move(bullet));
+		}
+
 		// PLAYER MOVEMENT
 
 		Vector2 direction{ 0.0f, 0.0f };
@@ -394,6 +363,44 @@ int main() {
 		// UPDATE ALL ACTORS
 
 		scene.Update(dt);
+
+		// BULLET AND ENEMY COLLISION
+
+		for (auto& actor : scene.GetActors()) {
+			// Check whether this actor is a bullet.
+			Bullet* bullet =
+				dynamic_cast<Bullet*>(actor.get());
+
+			if (
+				bullet == nullptr ||
+				bullet->IsDestroyed()
+				) {
+				continue;
+			}
+
+			for (auto& otherActor : scene.GetActors()) {
+				// Check whether the other actor is an enemy.
+				Enemy* enemy =
+					dynamic_cast<Enemy*>(otherActor.get());
+
+				if (
+					enemy == nullptr ||
+					enemy->IsDestroyed()
+					) {
+					continue;
+				}
+
+				if (bullet->IsColliding(*enemy)) {
+					bullet->Destroy();
+					enemy->Destroy();
+
+					// A bullet can only destroy one enemy.
+					break;
+				}
+			}
+		}
+
+		// MOUSE DRAWING
 
 		// MOUSE DRAWING
 

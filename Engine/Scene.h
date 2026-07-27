@@ -28,12 +28,26 @@ namespace nu {
 			return a_pendingActors.size();
 		}
 
+		// Allows Main.cpp to check actors for collisions.
+		std::vector<std::unique_ptr<Actor>>& GetActors() {
+			return a_actors;
+		}
+
+		const std::vector<std::unique_ptr<Actor>>&
+			GetActors() const {
+			return a_actors;
+		}
+
 	private:
 		void AddPendingActors();
 		void RemoveDestroyedActors();
 
 	private:
+		// Actors currently being updated and drawn.
 		std::vector<std::unique_ptr<Actor>> a_actors;
-		std::vector<std::unique_ptr<Actor>> a_pendingActors;
+
+		// Actors created during gameplay, such as bullets.
+		std::vector<std::unique_ptr<Actor>>
+			a_pendingActors;
 	};
 }

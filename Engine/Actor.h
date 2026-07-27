@@ -67,6 +67,20 @@ namespace nu {
 			a_lifespan = lifespan;
 		}
 
+		// Collision
+		void SetCollisionRadius(float radius) {
+			a_collisionRadius = radius;
+		}
+
+		float GetCollisionRadius() const {
+			return (
+				a_collisionRadius *
+				a_transform.scale
+				);
+		}
+
+		bool IsColliding(const Actor& other) const;
+
 		bool IsDestroyed() const {
 			return a_destroyed;
 		}
@@ -81,6 +95,9 @@ namespace nu {
 
 		float a_damping = 1.0f;
 		float a_lifespan = -1.0f;
+
+		// Radius before the actor's scale is applied
+		float a_collisionRadius = 1.0f;
 
 		bool a_destroyed = false;
 

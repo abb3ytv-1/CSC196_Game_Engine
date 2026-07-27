@@ -42,9 +42,31 @@ namespace nu {
 		);
 	}
 
-	void Actor::Draw(const Renderer& renderer) const {
+	void Actor::Draw(
+		const Renderer& renderer
+	) const {
 		if (!a_destroyed) {
-			renderer.DrawModel(a_model, a_transform);
+			renderer.DrawModel(
+				a_model,
+				a_transform
+			);
 		}
+	}
+
+	bool Actor::IsColliding(
+		const Actor& other
+	) const {
+		Vector2 difference =
+			other.GetTransform().position -
+			a_transform.position;
+
+		float combinedRadius =
+			GetCollisionRadius() +
+			other.GetCollisionRadius();
+
+		return (
+			difference.LengthSqr() <=
+			combinedRadius * combinedRadius
+			);
 	}
 }

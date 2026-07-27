@@ -4,17 +4,31 @@
 #include "MathUtils.h"
 
 namespace nu {
-	/*
-	* Thigs to add
-	* - lifespan
-	*/
-
 	void Actor::Update(float dt) {
+		if (a_destroyed) {
+			return;
+		}
+
+		// Update lifespan when one has been set.
+		// A negative lifespan means the actor lives forever.
+		if (a_lifespan > 0.0f) {
+			a_lifespan -= dt;
+
+			if (a_lifespan <= 0.0f) {
+				Destroy();
+				return;
+			}
+		}
 
 		// Physics
-		a_transform.position += (a_velocity * dt);
-		a_velocity *= (1.0f / ((1.6f) + a_damping * dt));
+		a_transform.position += a_velocity * dt;
 
+		a_velocity *= (
+			1.0f /
+			(1.0f + (a_damping * dt))
+			);
+
+		// Wrap actors around the screen
 		a_transform.position.x = Wrap(
 			0.0f,
 			1920.0f,
@@ -29,6 +43,8 @@ namespace nu {
 	}
 
 	void Actor::Draw(const Renderer& renderer) const {
-		renderer.DrawModel(a_model, a_transform);
+		if (!a_destroyed) {
+			renderer.DrawModel(a_model, a_transform);
+		}
 	}
 }

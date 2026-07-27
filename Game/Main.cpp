@@ -1,7 +1,7 @@
 #include "../Engine/Engine.h"
-#include "../Engine/Enemy.h"
 
 #include <iostream>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -10,37 +10,37 @@ using namespace nu;
 int main() {
 	/*
 	* Things to add later:
-	* - Bullets
-	* - Scene class
-	* - Pending actors
-	* - Update actors through Scene
-	* - Remove destroyed actors
-	* - Actor lifespan
-	* - More comments and code cleanup
+	* - Bullet class
+	* - Player shooting
+	* - Enemy collisions
+	* - Actor tags
+	* - Additional scene management
 	*/
 
 	// INITIALIZE
+
 	if (!engine.Initialize()) {
 		return 1;
 	}
 
 	Renderer& renderer = engine.GetRenderer();
 	Input& input = engine.GetInput();
+	AudioSystem& audio = engine.GetAudio();
 
 	// FILESYSTEM TESTING
 
-	// Get current working directory
 	std::cout << "Directory Operations:\n";
 	std::cout
 		<< "Working directory: "
 		<< GetWorkingDirectory()
 		<< '\n';
 
-	// Change from Build to Build/Assets
 	std::cout << "Setting directory to 'Assets'...\n";
 
 	if (!SetWorkingDirectory("Assets")) {
-		std::cerr << "Could not open the Assets directory.\n";
+		std::cerr
+			<< "Could not open the Assets directory.\n";
+
 		engine.Shutdown();
 		return 1;
 	}
@@ -50,7 +50,6 @@ int main() {
 		<< GetWorkingDirectory()
 		<< "\n\n";
 
-	// Get files in Assets
 	std::cout << "Files in Directory:\n";
 
 	auto filenames =
@@ -62,22 +61,31 @@ int main() {
 
 	std::cout << '\n';
 
-	// Display filename information
 	if (!filenames.empty()) {
-		std::string value = GetFilename(filenames[0]);
-		std::cout << "Filename: " << value << '\n';
+		std::string value =
+			GetFilename(filenames[0]);
+
+		std::cout
+			<< "Filename: "
+			<< value
+			<< '\n';
 
 		value = GetFileExtension(filenames[0]);
-		std::cout << "Extension: " << value << '\n';
 
-		value = GetFilenameNoExtension(filenames[0]);
+		std::cout
+			<< "Extension: "
+			<< value
+			<< '\n';
+
+		value =
+			GetFilenameNoExtension(filenames[0]);
+
 		std::cout
 			<< "Filename No Extension: "
 			<< value
 			<< "\n\n";
 	}
 
-	// Read test.txt
 	std::cout << "Text File Reading:\n";
 
 	std::string text;
@@ -89,7 +97,6 @@ int main() {
 		std::cerr << "Could not read test.txt\n";
 	}
 
-	// Append to test.txt
 	std::cout << "Text File Writing:\n";
 
 	WriteTextFile(
@@ -104,17 +111,14 @@ int main() {
 
 	// AUDIO
 
-	AudioSystem& audio = engine.GetAudio();
+	audio.LoadSound("bass", "bass.wav");
+	audio.LoadSound("snare", "snare.wav");
+	audio.LoadSound("clap", "clap.wav");
+	audio.LoadSound("open-hat", "open-hat.wav");
+	audio.LoadSound("cowbell", "cowbell.wav");
 
-	audio.LoadSound("bass.wav");
-	audio.LoadSound("snare.wav");
-	audio.LoadSound("clap.wav");
-	audio.LoadSound("open-hat.wav");
-	audio.LoadSound("cowbell.wav");
+	// FISH MODEL POINTS
 
-	// PLAYER MODEL
-
-	// Fish body
 	std::vector<Vector2> bodyPoints{
 		Vector2{ -6.0f, 0.0f },
 		Vector2{ -3.0f, -3.0f },
@@ -125,7 +129,6 @@ int main() {
 		Vector2{ -6.0f, 0.0f }
 	};
 
-	// Fish tail
 	std::vector<Vector2> tailPoints{
 		Vector2{ -6.0f, 0.0f },
 		Vector2{ -10.0f, -4.0f },
@@ -134,7 +137,6 @@ int main() {
 		Vector2{ -6.0f, 0.0f }
 	};
 
-	// Fish top fin
 	std::vector<Vector2> topFinPoints{
 		Vector2{ -2.0f, -3.0f },
 		Vector2{ 0.0f, -6.0f },
@@ -142,7 +144,6 @@ int main() {
 		Vector2{ -2.0f, -3.0f }
 	};
 
-	// Fish side fin
 	std::vector<Vector2> sideFinPoints{
 		Vector2{ 0.0f, 1.0f },
 		Vector2{ 2.0f, 4.0f },
@@ -150,7 +151,6 @@ int main() {
 		Vector2{ 0.0f, 1.0f }
 	};
 
-	// Fish eye
 	std::vector<Vector2> eyePoints{
 		Vector2{ 4.0f, -1.0f },
 		Vector2{ 5.0f, -1.0f },
@@ -159,7 +159,8 @@ int main() {
 		Vector2{ 4.0f, -1.0f }
 	};
 
-	// Create the player meshes
+	// PLAYER MODEL
+
 	Mesh bodyMesh{
 		bodyPoints,
 		Color{ 0.45f, 0.85f, 0.80f }
@@ -185,7 +186,6 @@ int main() {
 		Color{ 1.0f, 1.0f, 1.0f }
 	};
 
-	// Add the meshes to the player model
 	Model fishModel;
 
 	fishModel.AddMesh(bodyMesh);
@@ -196,7 +196,6 @@ int main() {
 
 	// ENEMY MODEL
 
-	// The enemies use the same points but have different colors
 	Mesh enemyBodyMesh{
 		bodyPoints,
 		Color{ 1.0f, 0.2f, 0.2f }
@@ -222,7 +221,6 @@ int main() {
 		Color{ 0.0f, 0.0f, 0.0f }
 	};
 
-	// Add the enemy meshes to the enemy model
 	Model enemyModel;
 
 	enemyModel.AddMesh(enemyBodyMesh);
@@ -231,63 +229,76 @@ int main() {
 	enemyModel.AddMesh(enemySideFinMesh);
 	enemyModel.AddMesh(enemyEyeMesh);
 
-	// CREATE PLAYER
+	// SCENE AND ACTORS
 
-	Actor player{
+	Scene scene;
+
+	auto playerActor = std::make_unique<Actor>(
 		Transform{
 			Vector2{ 960.0f, 540.0f },
 			0.0f,
 			10.0f
 		},
 		fishModel
-	};
+	);
 
-	// CREATE ENEMIES
+	// Keep a non-owning pointer for input and enemy targets.
+	// Scene owns the actual Actor.
+	Actor* player = playerActor.get();
 
-	std::vector<Enemy> enemies{
-		Enemy{
-			Transform{
-				Vector2{ 200.0f, 200.0f },
-				0.0f,
-				8.0f
-			},
-			enemyModel,
-			100.0f
+	scene.AddActor(std::move(playerActor));
+
+	auto enemyOne = std::make_unique<Enemy>(
+		Transform{
+			Vector2{ 200.0f, 200.0f },
+			0.0f,
+			8.0f
 		},
-		Enemy{
-			Transform{
-				Vector2{ 1700.0f, 300.0f },
-				0.0f,
-				8.0f
-			},
-			enemyModel,
-			125.0f
+		enemyModel,
+		100.0f
+	);
+
+	enemyOne->SetTarget(*player);
+	scene.AddActor(std::move(enemyOne));
+
+	auto enemyTwo = std::make_unique<Enemy>(
+		Transform{
+			Vector2{ 1700.0f, 300.0f },
+			0.0f,
+			8.0f
 		},
-		Enemy{
-			Transform{
-				Vector2{ 400.0f, 900.0f },
-				0.0f,
-				8.0f
-			},
-			enemyModel,
-			75.0f
-		}
-	};
+		enemyModel,
+		125.0f
+	);
 
-	// Give every enemy the player as its target
-	for (Enemy& enemy : enemies) {
-		enemy.SetTarget(player);
-	}
+	enemyTwo->SetTarget(*player);
+	scene.AddActor(std::move(enemyTwo));
 
-	// Store recorded mouse positions
+	auto enemyThree = std::make_unique<Enemy>(
+		Transform{
+			Vector2{ 400.0f, 900.0f },
+			0.0f,
+			8.0f
+		},
+		enemyModel,
+		75.0f
+	);
+
+	enemyThree->SetTarget(*player);
+	scene.AddActor(std::move(enemyThree));
+
+	// MOUSE DRAWING CONTAINERS
+
 	std::vector<Vector2> points;
 	std::vector<bool> startsNewShape;
 
 	bool quit = false;
 
 	// MAIN LOOP
+
 	while (!quit) {
 		// EVENTS
+
 		SDL_Event event;
 
 		while (SDL_PollEvent(&event)) {
@@ -297,42 +308,47 @@ int main() {
 
 			if (
 				event.type == SDL_EVENT_KEY_DOWN &&
-				event.key.scancode == SDL_SCANCODE_ESCAPE
+				event.key.scancode ==
+				SDL_SCANCODE_ESCAPE
 				) {
 				quit = true;
 			}
 		}
 
 		// UPDATE ENGINE
+
 		engine.Update();
 
-		float dt = engine.GetTime().GetDeltaTime();
+		float dt =
+			engine.GetTime().GetDeltaTime();
 
 		// AUDIO INPUT
 
 		if (input.GetKeyPress(SDL_SCANCODE_1)) {
-			audio.PlaySound(0);
+			audio.PlaySound("bass");
 		}
 
 		if (input.GetKeyPress(SDL_SCANCODE_2)) {
-			audio.PlaySound(1);
+			audio.PlaySound("snare");
 		}
 
 		if (input.GetKeyPress(SDL_SCANCODE_3)) {
-			audio.PlaySound(2);
+			audio.PlaySound("clap");
 		}
 
 		if (input.GetKeyPress(SDL_SCANCODE_4)) {
-			audio.PlaySound(3);
+			audio.PlaySound("open-hat");
 		}
 
 		if (input.GetKeyPress(SDL_SCANCODE_5)) {
-			audio.PlaySound(4);
+			audio.PlaySound("cowbell");
 		}
 
 		// PLAYER ROTATION
 
-		float rotation = player.GetTransform().rotation;
+		float rotation =
+			player->GetTransform().rotation;
+
 		float rotationSpeed = 180.0f;
 
 		if (input.GetKeyDown(SDL_SCANCODE_LEFT)) {
@@ -343,7 +359,7 @@ int main() {
 			rotation += rotationSpeed * dt;
 		}
 
-		player.SetRotation(rotation);
+		player->SetRotation(rotation);
 
 		// PLAYER MOVEMENT
 
@@ -371,28 +387,34 @@ int main() {
 
 		float movementSpeed = 300.0f;
 
-		player.SetVelocity(direction * movementSpeed);
-		player.Update(dt);
+		player->SetVelocity(
+			direction * movementSpeed
+		);
 
-		// UPDATE ENEMIES
+		// UPDATE ALL ACTORS
 
-		for (Enemy& enemy : enemies) {
-			enemy.Update(dt);
-		}
+		scene.Update(dt);
 
 		// MOUSE DRAWING
 
-		// Start a new mouse drawing
-		if (input.GetButtonPressed(Input::MouseButton::Left)) {
-			Vector2 position = input.GetMousePosition();
+		if (
+			input.GetButtonPressed(
+				Input::MouseButton::Left
+			)
+			) {
+			Vector2 position =
+				input.GetMousePosition();
 
 			points.push_back(position);
 			startsNewShape.push_back(true);
 		}
-
-		// Continue drawing while the mouse is held
-		else if (input.GetMouseDown(Input::MouseButton::Left)) {
-			Vector2 position = input.GetMousePosition();
+		else if (
+			input.GetMouseDown(
+				Input::MouseButton::Left
+			)
+			) {
+			Vector2 position =
+				input.GetMousePosition();
 
 			if (!points.empty()) {
 				Vector2 difference =
@@ -410,10 +432,13 @@ int main() {
 		renderer.SetColor(0, 0, 0, 255);
 		renderer.Clear();
 
-		// Draw mouse lines
 		renderer.SetColor(255, 255, 255, 255);
 
-		for (std::size_t i = 0; i + 1 < points.size(); i++) {
+		for (
+			std::size_t i = 0;
+			i + 1 < points.size();
+			i++
+			) {
 			if (!startsNewShape[i + 1]) {
 				renderer.DrawLine(
 					points[i].x,
@@ -424,18 +449,15 @@ int main() {
 			}
 		}
 
-		// Draw the player
-		player.Draw(renderer);
-
-		// Draw the enemies
-		for (const Enemy& enemy : enemies) {
-			enemy.Draw(renderer);
-		}
+		// Draw every actor in the Scene
+		scene.Draw(renderer);
 
 		renderer.Present();
 	}
 
 	// SHUTDOWN
+
+	scene.RemoveAll();
 	engine.Shutdown();
 
 	return 0;

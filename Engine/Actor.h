@@ -3,46 +3,87 @@
 #include "Transform.h"
 #include "Model.h"
 
-
 namespace nu {
-    class Actor {
+	class Actor {
+	public:
+		Actor() = default;
+		virtual ~Actor() = default;
 
-        /*
-        * Actor description:
-        * - name
-        * - model
-        * - transform
-        * - speed
-        * - damping
-        * - velocity
-        * - tag
-        * - lifespan
-        */ 
-        
+		Actor(const Transform& transform) :
+			a_transform{ transform }
+		{}
 
-        public:
-            Actor() = default;
-            virtual ~Actor() = default;
-            Actor(const Transform& transform) : a_transform{ transform } {}
-            Actor(const Transform& transform, const Model& model) : a_transform{transform}, a_model{model} {}
+		Actor(
+			const Transform& transform,
+			const Model& model
+		) :
+			a_transform{ transform },
+			a_model{ model }
+		{}
 
-            virtual void Update(float dt);
-            virtual void Draw(const class Renderer& renderer) const;
+		virtual void Update(float dt);
 
-            const Transform& GetTransform() const { return a_transform; }
-            void SetPosition(const Vector2& position) { a_transform.position = position; }
-            void SetRotation(float rotation) { a_transform.rotation = rotation; }
-            void SetScale(float scale) { a_transform.scale = scale; }
+		virtual void Draw(
+			const class Renderer& renderer
+		) const;
 
-            const Vector2& GetVelocity() const { return a_velocity; }
-            void SetVelocity(const Vector2& velocity) { a_velocity = velocity; }
+		const Transform& GetTransform() const {
+			return a_transform;
+		}
 
+		void SetPosition(const Vector2& position) {
+			a_transform.position = position;
+		}
 
-        protected:
-            Transform a_transform;
-            Vector2 a_velocity{ 0,0 };
-            float a_damping = 1.0f;
-            
-            Model a_model;
-        };
- }
+		void SetRotation(float rotation) {
+			a_transform.rotation = rotation;
+		}
+
+		void SetScale(float scale) {
+			a_transform.scale = scale;
+		}
+
+		const Vector2& GetVelocity() const {
+			return a_velocity;
+		}
+
+		void SetVelocity(const Vector2& velocity) {
+			a_velocity = velocity;
+		}
+
+		float GetDamping() const {
+			return a_damping;
+		}
+
+		void SetDamping(float damping) {
+			a_damping = damping;
+		}
+
+		float GetLifespan() const {
+			return a_lifespan;
+		}
+
+		void SetLifespan(float lifespan) {
+			a_lifespan = lifespan;
+		}
+
+		bool IsDestroyed() const {
+			return a_destroyed;
+		}
+
+		void Destroy() {
+			a_destroyed = true;
+		}
+
+	protected:
+		Transform a_transform;
+		Vector2 a_velocity{ 0.0f, 0.0f };
+
+		float a_damping = 1.0f;
+		float a_lifespan = -1.0f;
+
+		bool a_destroyed = false;
+
+		Model a_model;
+	};
+}

@@ -9,14 +9,15 @@
 #include "MathUtils.h"
 #include "Transform.h"
 #include "Actor.h"
+#include "Enemy.h"
+#include "Scene.h"
 #include "AudioSystem.h"
 #include "File.h"
-#include "Enemy.h"
 
 #include <SDL3/SDL.h>
+
 #include <iostream>
 #include <vector>
-
 
 namespace nu {
 	class Engine {
@@ -27,11 +28,21 @@ namespace nu {
 		void Shutdown();
 		void Update();
 
-		Input& GetInput() { return a_input; }
-		Renderer& GetRenderer() { return a_renderer; }
-		Time& GetTime() { return a_time; }
+		Input& GetInput() {
+			return a_input;
+		}
 
-		AudioSystem& GetAudio() { return a_audio; }
+		Renderer& GetRenderer() {
+			return a_renderer;
+		}
+
+		Time& GetTime() {
+			return a_time;
+		}
+
+		AudioSystem& GetAudio() {
+			return a_audio;
+		}
 
 	private:
 		Input a_input;

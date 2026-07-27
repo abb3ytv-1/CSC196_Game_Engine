@@ -2,27 +2,29 @@
 #include "AudioSystem.h"
 
 #include <fmod_errors.h>
+
 #include <iostream>
 
 namespace nu {
 	bool AudioSystem::Initialize() {
-		FMOD_RESULT result = FMOD::System_Create(&a_audio);
+		FMOD_RESULT result =
+			FMOD::System_Create(&a_audio);
 
 		if (result != FMOD_OK) {
 			std::cerr
 				<< "FMOD System_Create failed: "
 				<< FMOD_ErrorString(result)
-				<< "\n";
+				<< '\n';
 
 			return false;
 		}
 
-		void* extradriverdata = nullptr;
+		void* extraDriverData = nullptr;
 
 		result = a_audio->init(
 			32,
 			FMOD_INIT_NORMAL,
-			extradriverdata
+			extraDriverData
 		);
 
 		if (result != FMOD_OK) {
@@ -48,6 +50,7 @@ namespace nu {
 		}
 
 		a_sounds.clear();
+		a_soundIndexes.clear();
 
 		if (a_audio != nullptr) {
 			a_audio->close();
@@ -62,8 +65,18 @@ namespace nu {
 		}
 	}
 
-	bool AudioSystem::LoadSound(const char* filename) {
-		FMOD::Sound* sound = nullptr;
+	bool AudioSystem::CreateSound(
+		const char* filename,
+		FMOD::Sound*& sound
+	) {
+		if (
+			a_audio == nullptr ||
+			filename == nullptr
+			) {
+			return false;
+		}
+
+		sound = nullptr;
 
 		FMOD_RESULT result = a_audio->createSound(
 			filename,
@@ -72,16 +85,60 @@ namespace nu {
 			&sound
 		);
 
-		a_sounds.push_back(sound);
-
 		if (result != FMOD_OK) {
 			std::cerr
-				<< "Could not load " << filename << ": "
+				<< "Could not load "
+				<< filename
+				<< ": "
 				<< FMOD_ErrorString(result)
 				<< '\n';
 
+			sound = nullptr;
 			return false;
 		}
+
+		return true;
+	}
+
+	bool AudioSystem::LoadSound(const char* filename) {
+		FMOD::Sound* sound = nullptr;
+
+		if (!CreateSound(filename, sound)) {
+			return false;
+		}
+
+		a_sounds.push_back(sound);
+
+		return true;
+	}
+
+	bool AudioSystem::LoadSound(
+		const std::string& name,
+		const std::string& filename
+	) {
+		if (name.empty() || filename.empty()) {
+			return false;
+		}
+
+		if (HasSound(name)) {
+			std::cerr
+				<< "A sound named '"
+				<< name
+				<< "' is already loaded.\n";
+
+			return false;
+		}
+
+		FMOD::Sound* sound = nullptr;
+
+		if (!CreateSound(filename.c_str(), sound)) {
+			return false;
+		}
+
+		std::size_t index = a_sounds.size();
+
+		a_sounds.push_back(sound);
+		a_soundIndexes[name] = index;
 
 		return true;
 	}
@@ -108,5 +165,31 @@ namespace nu {
 				<< FMOD_ErrorString(result)
 				<< '\n';
 		}
+	}
+
+	void AudioSystem::PlaySound(
+		const std::string& name
+	) {
+		auto iterator = a_soundIndexes.find(name);
+
+		if (iterator == a_soundIndexes.end()) {
+			std::cerr
+				<< "Could not find sound named '"
+				<< name
+				<< "'.\n";
+
+			return;
+		}
+
+		PlaySound(iterator->second);
+	}
+
+	bool AudioSystem::HasSound(
+		const std::string& name
+	) const {
+		return (
+			a_soundIndexes.find(name) !=
+			a_soundIndexes.end()
+			);
 	}
 }

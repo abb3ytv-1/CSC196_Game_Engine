@@ -26,9 +26,11 @@ namespace nu {
         int GetHeight() const { return a_height; }
         int GetWidth() const { return a_width; }
 
+        friend class Text;
+
     private:
         SDL_Window* m_window{ nullptr };
-        SDL_Renderer* m_renderer{ nullptr };
+        SDL_Renderer* a_renderer{ nullptr };
 
         int a_width{ 0 };
         int a_height{ 0 };

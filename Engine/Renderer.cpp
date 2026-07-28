@@ -5,6 +5,7 @@
 #include "Model.h"
 #include "MathUtils.h"
 
+#include <SDL3_ttf/SDL_ttf.h>
 #include <SDL3/SDL.h>
 #include <iostream>
 
@@ -25,15 +26,15 @@ bool Renderer::Initialize(const char* name, int width, int height)
 		return false;
 	}
 
-	m_renderer = SDL_CreateRenderer(m_window, NULL);
-	if (m_renderer == nullptr) {
+	a_renderer = SDL_CreateRenderer(m_window, NULL);
+	if (a_renderer == nullptr) {
 		std::cerr << "SDL_CreateRenderer Error: " << SDL_GetError() << std::endl;
 		SDL_DestroyWindow(m_window);
 		SDL_Quit();
 		return false;
 	}
 
-	SDL_SetRenderVSync(m_renderer, 1);
+	SDL_SetRenderVSync(a_renderer, 1);
 
 	return true;
 }
@@ -41,7 +42,8 @@ bool Renderer::Initialize(const char* name, int width, int height)
 // Shutdown
 void Renderer::Shutdown()
 {
-	SDL_DestroyRenderer(m_renderer);
+	TTF_Quit();
+	SDL_DestroyRenderer(a_renderer);
 	SDL_DestroyWindow(m_window);
 	SDL_Quit();
 }
@@ -49,45 +51,45 @@ void Renderer::Shutdown()
 // Clear
 void Renderer::Clear() const
 {
-	SDL_RenderClear(m_renderer);
+	SDL_RenderClear(a_renderer);
 }
 
 // Present
 void Renderer::Present() const
 {
-	SDL_RenderPresent(m_renderer);
+	SDL_RenderPresent(a_renderer);
 }
 
 //Setcolor
 void Renderer::SetColor(Uint8 r, Uint8 g, Uint8 b, Uint8 a) const
 {
-	SDL_SetRenderDrawColor(m_renderer, r, g, b, a);
+	SDL_SetRenderDrawColor(a_renderer, r, g, b, a);
 }
 
 // Draw point
 void Renderer::DrawPoint(float x, float y) const
 {
-	SDL_RenderPoint(m_renderer, x, y);
+	SDL_RenderPoint(a_renderer, x, y);
 }
 
 // Draw Filled Rectangle
 void Renderer::DrawFillRect(float x, float y, float w, float h) const 
 {
 	SDL_FRect rect = { x, y, w, h };
-	SDL_RenderFillRect(m_renderer, &rect);
+	SDL_RenderFillRect(a_renderer, &rect);
 }
 
 // Draw Rectangle Outline
 void Renderer::DrawRect(float x, float y, float w, float h) const
 {
 	SDL_FRect rect = { x, y, w, h };
-	SDL_RenderRect(m_renderer, &rect);
+	SDL_RenderRect(a_renderer, &rect);
 }
 
 // Draw Line
 void Renderer::DrawLine(float x1, float y1, float x2, float y2) const
 {
-	SDL_RenderLine(m_renderer, x1, y1, x2, y2);
+	SDL_RenderLine(a_renderer, x1, y1, x2, y2);
 }
 
 

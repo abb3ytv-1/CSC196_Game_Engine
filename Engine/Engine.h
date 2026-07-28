@@ -13,9 +13,9 @@
 #include "Scene.h"
 #include "AudioSystem.h"
 #include "File.h"
+#include "Text.h"
 
 #include <SDL3/SDL.h>
-
 #include <iostream>
 #include <vector>
 

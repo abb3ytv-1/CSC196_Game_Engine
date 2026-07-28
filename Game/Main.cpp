@@ -463,7 +463,6 @@ int main() {
 	}
 
 	// SHUTDOWN
-
 	scene.RemoveAll();
 	engine.Shutdown();
 

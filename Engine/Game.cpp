@@ -1,13 +1,20 @@
 #include "pch.h"
 #include "Game.h"
 #include "Scene.h"
+#include "Renderer.h"
 
 namespace nu {
 	void Game::Update(float dt) {
-		a_scene->Update(dt);
+		if (a_scene != nullptr) {
+			a_scene->Update(dt);
+		}
 	}
 
-	void Game::Draw(const Renderer& renderer) {
-		a_scene->Draw(renderer)
+	void Game::Draw(
+		const Renderer& renderer
+	) {
+		if (a_scene != nullptr) {
+			a_scene->Draw(renderer);
+		}
 	}
 }

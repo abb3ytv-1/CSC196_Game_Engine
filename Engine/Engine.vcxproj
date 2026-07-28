@@ -166,6 +166,7 @@
     <ClInclude Include="File.h" />
     <ClInclude Include="Font.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="Game.h" />
     <ClInclude Include="GameTime.h" />
     <ClInclude Include="MathUtils.h" />
     <ClInclude Include="Input.h" />
@@ -188,6 +189,7 @@
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="File.cpp" />
     <ClCompile Include="Font.cpp" />
+    <ClCompile Include="Game.cpp" />
     <ClCompile Include="GameTime.cpp" />
     <ClCompile Include="input.cpp" />
     <ClCompile Include="pch.cpp">

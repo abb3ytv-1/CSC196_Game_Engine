@@ -2,6 +2,7 @@
 
 #include "Assets.h"
 #include "Bullet.h"
+#include "Space_Game.h"
 
 #include <memory>
 #include <vector>
@@ -17,24 +18,30 @@ int main() {
 	*/
 
 	// INITIALIZE
-
 	if (!engine.Initialize()) {
 		return 1;
 	}
+
+	SpaceGame game;
+
 
 	Renderer& renderer = engine.GetRenderer();
 	Input& input = engine.GetInput();
 	AudioSystem& audio = engine.GetAudio();
 
 	// Set the working directory so audio files can be found.
-
 	if (!SetWorkingDirectory("Assets")) {
 		engine.Shutdown();
 		return 1;
 	}
 
-	// AUDIO
+	Font* font = new Font();
+	font->Load("Fonts/New Moon.ttf", 20);
 
+	Text* text = new Text(font);
+	text->Create(engine.GetRenderer(), "Hello World", Color{ 1.0f, 1.0f, 10.f });
+
+	// AUDIO
 	audio.LoadSound("bass", "bass.wav");
 	audio.LoadSound("snare", "snare.wav");
 	audio.LoadSound("clap", "clap.wav");
@@ -42,7 +49,6 @@ int main() {
 	audio.LoadSound("cowbell", "cowbell.wav");
 
 	// FISH MODEL POINTS
-
 	std::vector<Vector2> bodyPoints{
 		Vector2{ -6.0f, 0.0f },
 		Vector2{ -3.0f, -3.0f },
@@ -458,6 +464,7 @@ int main() {
 
 		// Draw every actor in the Scene
 		scene.Draw(renderer);
+		text->Draw(engine.GetRenderer(), 400.0f, 400.0f);
 
 		renderer.Present();
 	}

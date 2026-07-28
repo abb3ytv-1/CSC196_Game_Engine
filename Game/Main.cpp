@@ -2,7 +2,6 @@
 
 #include "Assets.h"
 #include "Bullet.h"
-#include "Space_Game.h"
 
 #include <memory>
 #include <vector>
@@ -12,36 +11,59 @@ using namespace nu;
 int main() {
 	/*
 	* Things to add later:
-	* - Enemy collisions
 	* - Actor tags
 	* - Additional scene management
 	*/
 
 	// INITIALIZE
-	if (!engine.Initialize()) {
+
+	if (!nu::engine.Initialize()) {
 		return 1;
 	}
 
-	SpaceGame game;
+	nu::Renderer& renderer =
+		nu::engine.GetRenderer();
 
+	nu::Input& input =
+		nu::engine.GetInput();
 
-	Renderer& renderer = engine.GetRenderer();
-	Input& input = engine.GetInput();
-	AudioSystem& audio = engine.GetAudio();
+	nu::AudioSystem& audio =
+		nu::engine.GetAudio();
 
-	// Set the working directory so audio files can be found.
-	if (!SetWorkingDirectory("Assets")) {
-		engine.Shutdown();
+	// Set the working directory so assets can be found.
+
+	if (!nu::SetWorkingDirectory("Assets")) {
+		nu::engine.Shutdown();
 		return 1;
 	}
 
-	Font* font = new Font();
-	font->Load("Fonts/New Moon.ttf", 20);
+	// FONT AND TEXT
 
-	Text* text = new Text(font);
-	text->Create(engine.GetRenderer(), "Hello World", Color{ 1.0f, 1.0f, 10.f });
+	nu::Font* font = new nu::Font();
+
+	if (!font->Load("Fonts/New Moon.ttf", 20.0f)) {
+		delete font;
+		nu::engine.Shutdown();
+		return 1;
+	}
+
+	nu::Text* text = new nu::Text(font);
+
+	if (
+		!text->Create(
+			renderer,
+			"Hello World",
+			nu::Color{ 1.0f, 1.0f, 1.0f }
+		)
+		) {
+		delete text;
+		delete font;
+		nu::engine.Shutdown();
+		return 1;
+	}
 
 	// AUDIO
+
 	audio.LoadSound("bass", "bass.wav");
 	audio.LoadSound("snare", "snare.wav");
 	audio.LoadSound("clap", "clap.wav");
@@ -49,74 +71,75 @@ int main() {
 	audio.LoadSound("cowbell", "cowbell.wav");
 
 	// FISH MODEL POINTS
-	std::vector<Vector2> bodyPoints{
-		Vector2{ -6.0f, 0.0f },
-		Vector2{ -3.0f, -3.0f },
-		Vector2{ 3.0f, -3.0f },
-		Vector2{ 7.0f, 0.0f },
-		Vector2{ 3.0f, 3.0f },
-		Vector2{ -3.0f, 3.0f },
-		Vector2{ -6.0f, 0.0f }
+
+	std::vector<nu::Vector2> bodyPoints{
+		nu::Vector2{ -6.0f, 0.0f },
+		nu::Vector2{ -3.0f, -3.0f },
+		nu::Vector2{ 3.0f, -3.0f },
+		nu::Vector2{ 7.0f, 0.0f },
+		nu::Vector2{ 3.0f, 3.0f },
+		nu::Vector2{ -3.0f, 3.0f },
+		nu::Vector2{ -6.0f, 0.0f }
 	};
 
-	std::vector<Vector2> tailPoints{
-		Vector2{ -6.0f, 0.0f },
-		Vector2{ -10.0f, -4.0f },
-		Vector2{ -9.0f, 0.0f },
-		Vector2{ -10.0f, 4.0f },
-		Vector2{ -6.0f, 0.0f }
+	std::vector<nu::Vector2> tailPoints{
+		nu::Vector2{ -6.0f, 0.0f },
+		nu::Vector2{ -10.0f, -4.0f },
+		nu::Vector2{ -9.0f, 0.0f },
+		nu::Vector2{ -10.0f, 4.0f },
+		nu::Vector2{ -6.0f, 0.0f }
 	};
 
-	std::vector<Vector2> topFinPoints{
-		Vector2{ -2.0f, -3.0f },
-		Vector2{ 0.0f, -6.0f },
-		Vector2{ 2.0f, -3.0f },
-		Vector2{ -2.0f, -3.0f }
+	std::vector<nu::Vector2> topFinPoints{
+		nu::Vector2{ -2.0f, -3.0f },
+		nu::Vector2{ 0.0f, -6.0f },
+		nu::Vector2{ 2.0f, -3.0f },
+		nu::Vector2{ -2.0f, -3.0f }
 	};
 
-	std::vector<Vector2> sideFinPoints{
-		Vector2{ 0.0f, 1.0f },
-		Vector2{ 2.0f, 4.0f },
-		Vector2{ 3.0f, 1.0f },
-		Vector2{ 0.0f, 1.0f }
+	std::vector<nu::Vector2> sideFinPoints{
+		nu::Vector2{ 0.0f, 1.0f },
+		nu::Vector2{ 2.0f, 4.0f },
+		nu::Vector2{ 3.0f, 1.0f },
+		nu::Vector2{ 0.0f, 1.0f }
 	};
 
-	std::vector<Vector2> eyePoints{
-		Vector2{ 4.0f, -1.0f },
-		Vector2{ 5.0f, -1.0f },
-		Vector2{ 5.0f, 0.0f },
-		Vector2{ 4.0f, 0.0f },
-		Vector2{ 4.0f, -1.0f }
+	std::vector<nu::Vector2> eyePoints{
+		nu::Vector2{ 4.0f, -1.0f },
+		nu::Vector2{ 5.0f, -1.0f },
+		nu::Vector2{ 5.0f, 0.0f },
+		nu::Vector2{ 4.0f, 0.0f },
+		nu::Vector2{ 4.0f, -1.0f }
 	};
 
 	// PLAYER MODEL
 
-	Mesh bodyMesh{
+	nu::Mesh bodyMesh{
 		bodyPoints,
-		Color{ 0.45f, 0.85f, 0.80f }
+		nu::Color{ 0.45f, 0.85f, 0.80f }
 	};
 
-	Mesh tailMesh{
+	nu::Mesh tailMesh{
 		tailPoints,
-		Color{ 1.0f, 0.72f, 0.25f }
+		nu::Color{ 1.0f, 0.72f, 0.25f }
 	};
 
-	Mesh topFinMesh{
+	nu::Mesh topFinMesh{
 		topFinPoints,
-		Color{ 0.65f, 0.45f, 0.90f }
+		nu::Color{ 0.65f, 0.45f, 0.90f }
 	};
 
-	Mesh sideFinMesh{
+	nu::Mesh sideFinMesh{
 		sideFinPoints,
-		Color{ 0.95f, 0.45f, 0.70f }
+		nu::Color{ 0.95f, 0.45f, 0.70f }
 	};
 
-	Mesh eyeMesh{
+	nu::Mesh eyeMesh{
 		eyePoints,
-		Color{ 1.0f, 1.0f, 1.0f }
+		nu::Color{ 1.0f, 1.0f, 1.0f }
 	};
 
-	Model fishModel;
+	nu::Model fishModel;
 
 	fishModel.AddMesh(bodyMesh);
 	fishModel.AddMesh(tailMesh);
@@ -126,32 +149,32 @@ int main() {
 
 	// ENEMY MODEL
 
-	Mesh enemyBodyMesh{
+	nu::Mesh enemyBodyMesh{
 		bodyPoints,
-		Color{ 1.0f, 0.2f, 0.2f }
+		nu::Color{ 1.0f, 0.2f, 0.2f }
 	};
 
-	Mesh enemyTailMesh{
+	nu::Mesh enemyTailMesh{
 		tailPoints,
-		Color{ 0.7f, 0.0f, 0.0f }
+		nu::Color{ 0.7f, 0.0f, 0.0f }
 	};
 
-	Mesh enemyTopFinMesh{
+	nu::Mesh enemyTopFinMesh{
 		topFinPoints,
-		Color{ 0.8f, 0.1f, 0.1f }
+		nu::Color{ 0.8f, 0.1f, 0.1f }
 	};
 
-	Mesh enemySideFinMesh{
+	nu::Mesh enemySideFinMesh{
 		sideFinPoints,
-		Color{ 0.6f, 0.0f, 0.0f }
+		nu::Color{ 0.6f, 0.0f, 0.0f }
 	};
 
-	Mesh enemyEyeMesh{
+	nu::Mesh enemyEyeMesh{
 		eyePoints,
-		Color{ 0.0f, 0.0f, 0.0f }
+		nu::Color{ 0.0f, 0.0f, 0.0f }
 	};
 
-	Model enemyModel;
+	nu::Model enemyModel;
 
 	enemyModel.AddMesh(enemyBodyMesh);
 	enemyModel.AddMesh(enemyTailMesh);
@@ -161,34 +184,33 @@ int main() {
 
 	// BULLET MODEL
 
-	Model bulletModel;
+	nu::Model bulletModel;
 	bulletModel.AddMesh(bulletMesh);
 
 	// SCENE AND ACTORS
 
-	Scene scene;
+	nu::Scene scene;
 
-	auto playerActor = std::make_unique<Actor>(
-		Transform{
-			Vector2{ 960.0f, 540.0f },
+	auto playerActor = std::make_unique<nu::Actor>(
+		nu::Transform{
+			nu::Vector2{ 960.0f, 540.0f },
 			0.0f,
 			10.0f
 		},
 		fishModel
 	);
 
-	// Keep a non-owning pointer for input and enemy targets.
-	// Scene owns the actual Actor.
-	Actor* player = playerActor.get();
+	// Scene owns the player.
+	// This pointer only provides access to that player.
+	nu::Actor* player = playerActor.get();
 
-	// The player's model-space collision radius.
 	player->SetCollisionRadius(8.0f);
 
 	scene.AddActor(std::move(playerActor));
 
-	auto enemyOne = std::make_unique<Enemy>(
-		Transform{
-			Vector2{ 200.0f, 200.0f },
+	auto enemyOne = std::make_unique<nu::Enemy>(
+		nu::Transform{
+			nu::Vector2{ 200.0f, 200.0f },
 			0.0f,
 			8.0f
 		},
@@ -199,9 +221,9 @@ int main() {
 	enemyOne->SetTarget(*player);
 	scene.AddActor(std::move(enemyOne));
 
-	auto enemyTwo = std::make_unique<Enemy>(
-		Transform{
-			Vector2{ 1700.0f, 300.0f },
+	auto enemyTwo = std::make_unique<nu::Enemy>(
+		nu::Transform{
+			nu::Vector2{ 1700.0f, 300.0f },
 			0.0f,
 			8.0f
 		},
@@ -212,9 +234,9 @@ int main() {
 	enemyTwo->SetTarget(*player);
 	scene.AddActor(std::move(enemyTwo));
 
-	auto enemyThree = std::make_unique<Enemy>(
-		Transform{
-			Vector2{ 400.0f, 900.0f },
+	auto enemyThree = std::make_unique<nu::Enemy>(
+		nu::Transform{
+			nu::Vector2{ 400.0f, 900.0f },
 			0.0f,
 			8.0f
 		},
@@ -227,7 +249,7 @@ int main() {
 
 	// MOUSE DRAWING CONTAINERS
 
-	std::vector<Vector2> points;
+	std::vector<nu::Vector2> points;
 	std::vector<bool> startsNewShape;
 
 	bool quit = false;
@@ -246,8 +268,7 @@ int main() {
 
 			if (
 				event.type == SDL_EVENT_KEY_DOWN &&
-				event.key.scancode ==
-				SDL_SCANCODE_ESCAPE
+				event.key.scancode == SDL_SCANCODE_ESCAPE
 				) {
 				quit = true;
 			}
@@ -255,10 +276,10 @@ int main() {
 
 		// UPDATE ENGINE
 
-		engine.Update();
+		nu::engine.Update();
 
 		float dt =
-			engine.GetTime().GetDeltaTime();
+			nu::engine.GetTime().GetDeltaTime();
 
 		// AUDIO INPUT
 
@@ -302,27 +323,23 @@ int main() {
 		// PLAYER SHOOTING
 
 		if (input.GetKeyPress(SDL_SCANCODE_SPACE)) {
-			// The fish model faces toward positive x.
-			Vector2 forward{ 1.0f, 0.0f };
+			nu::Vector2 forward{ 1.0f, 0.0f };
 
-			// Rotate forward so that it matches
-			// the direction the player is facing.
 			forward = forward.Rotate(
-				rotation * DegToRad
+				rotation * nu::DegToRad
 			);
 
-			// Spawn the bullet in front of the player.
 			float spawnDistance =
 				player->GetCollisionRadius() +
 				10.0f;
 
-			Vector2 bulletPosition =
+			nu::Vector2 bulletPosition =
 				player->GetTransform().position +
 				(forward * spawnDistance);
 
 			auto bullet =
 				std::make_unique<Bullet>(
-					Transform{
+					nu::Transform{
 						bulletPosition,
 						rotation,
 						4.0f
@@ -332,13 +349,12 @@ int main() {
 					2.0f
 				);
 
-			// Scene takes ownership of the bullet.
 			scene.AddActor(std::move(bullet));
 		}
 
 		// PLAYER MOVEMENT
 
-		Vector2 direction{ 0.0f, 0.0f };
+		nu::Vector2 direction{ 0.0f, 0.0f };
 
 		if (input.GetKeyDown(SDL_SCANCODE_W)) {
 			direction.y -= 1.0f;
@@ -373,7 +389,6 @@ int main() {
 		// BULLET AND ENEMY COLLISION
 
 		for (auto& actor : scene.GetActors()) {
-			// Check whether this actor is a bullet.
 			Bullet* bullet =
 				dynamic_cast<Bullet*>(actor.get());
 
@@ -384,10 +399,14 @@ int main() {
 				continue;
 			}
 
-			for (auto& otherActor : scene.GetActors()) {
-				// Check whether the other actor is an enemy.
-				Enemy* enemy =
-					dynamic_cast<Enemy*>(otherActor.get());
+			for (
+				auto& otherActor :
+				scene.GetActors()
+				) {
+				nu::Enemy* enemy =
+					dynamic_cast<nu::Enemy*>(
+						otherActor.get()
+						);
 
 				if (
 					enemy == nullptr ||
@@ -400,7 +419,6 @@ int main() {
 					bullet->Destroy();
 					enemy->Destroy();
 
-					// A bullet can only destroy one enemy.
 					break;
 				}
 			}
@@ -408,14 +426,12 @@ int main() {
 
 		// MOUSE DRAWING
 
-		// MOUSE DRAWING
-
 		if (
 			input.GetButtonPressed(
-				Input::MouseButton::Left
+				nu::Input::MouseButton::Left
 			)
 			) {
-			Vector2 position =
+			nu::Vector2 position =
 				input.GetMousePosition();
 
 			points.push_back(position);
@@ -423,14 +439,14 @@ int main() {
 		}
 		else if (
 			input.GetMouseDown(
-				Input::MouseButton::Left
+				nu::Input::MouseButton::Left
 			)
 			) {
-			Vector2 position =
+			nu::Vector2 position =
 				input.GetMousePosition();
 
 			if (!points.empty()) {
-				Vector2 difference =
+				nu::Vector2 difference =
 					position - points.back();
 
 				if (difference.Length() > 10.0f) {
@@ -462,16 +478,26 @@ int main() {
 			}
 		}
 
-		// Draw every actor in the Scene
 		scene.Draw(renderer);
-		text->Draw(engine.GetRenderer(), 400.0f, 400.0f);
+
+		text->Draw(
+			renderer,
+			400.0f,
+			400.0f
+		);
 
 		renderer.Present();
 	}
 
 	// SHUTDOWN
+
 	scene.RemoveAll();
-	engine.Shutdown();
+
+	// Text and font must be deleted before SDL shuts down.
+	delete text;
+	delete font;
+
+	nu::engine.Shutdown();
 
 	return 0;
 }

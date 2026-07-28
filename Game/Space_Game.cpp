@@ -1,5 +1,6 @@
 #include "Space_Game.h"
 #include "Engine.h"
+#include "Scene.h"
 
 
 using namespace nu;
@@ -7,7 +8,7 @@ using namespace nu;
 bool SpaceGame::Initialize(){
     Game::Initialize();
 
-    a_scene = new Scene();
+    a_scene = new nu::Scene();
 
     return true;
 }
@@ -32,7 +33,7 @@ void SpaceGame::Update(float dt){
     Game::Update(dt);
 }
 
-void SpaceGame::Draw(const Renderer& renderer){
+void SpaceGame::Draw(const nu::Renderer& renderer){
     switch (a_gameState)
     {
     case GameState::Title:

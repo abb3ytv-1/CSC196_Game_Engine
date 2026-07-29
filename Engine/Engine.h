@@ -4,6 +4,7 @@
 #include "GameTime.h"
 #include "Input.h"
 #include "Renderer.h"
+#include "ParticleSystem.h"
 
 namespace nu {
 	class Engine {
@@ -30,11 +31,16 @@ namespace nu {
 			return a_audio;
 		}
 
+		ParticleSystem& GetPS() {
+			return a_particleSystem;
+		}
+
 	private:
 		Input a_input;
 		Renderer a_renderer;
 		Time a_time;
 		Audio a_audio;
+		ParticleSystem a_particleSystem;
 	};
 
 	extern Engine engine;

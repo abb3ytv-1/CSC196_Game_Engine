@@ -4,6 +4,8 @@
 #include "../Engine/Engine.h"
 #include "../Engine/File.h"
 #include "../Engine/MathUtils.h"
+#include "../Engine/ParticleSystem.h"
+#include "../Engine/Random.h"
 
 #include "Assets.h"
 #include "Bullet.h"
@@ -70,15 +72,15 @@ bool SpaceGame::LoadAudio() {
 
 	bool loaded = true;
 
-	loaded &= audio.AddSound( "bass", "bass.wav" );
+	loaded &= audio.AddSound( "bass", "Audio/bass.wav" );
 
-	loaded &= audio.AddSound( "snare", "snare.wav" );
+	loaded &= audio.AddSound( "snare", "Audio/snare.wav" );
 
-	loaded &= audio.AddSound( "clap", "clap.wav" );
+	loaded &= audio.AddSound( "clap", "Audio/clap.wav" );
 
-	loaded &= audio.AddSound( "open-hat", "open-hat.wav" );
+	loaded &= audio.AddSound( "open-hat", "Audio/open-hat.wav" );
 
-	loaded &= audio.AddSound( "cowbell", "cowbell.wav" );
+	loaded &= audio.AddSound( "cowbell", "Audio/cowbell.wav" );
 
 	return loaded;
 }
@@ -135,6 +137,7 @@ void SpaceGame::Update(float dt) {
 	case GameState::Game:
 		HandleAudioInput();
 		HandlePlayerInput(dt);
+		EmitPlayerParticle();
 		HandleMouseInput();
 
 		Game::Update(dt);
@@ -275,8 +278,13 @@ void SpaceGame::CheckCollisions() {
 			if ( enemy == nullptr || enemy->IsDestroyed() ) { continue; }
 
 			if (bullet->IsColliding(*enemy)) {
+				Vector2 explosionPosition =
+					enemy->GetTransform().position;
+
 				bullet->Destroy();
 				enemy->Destroy();
+
+				CreateExplosion( explosionPosition, Color{ 1.0f, 0.65f, 0.2f }, 100 );
 
 				a_score++;
 
@@ -284,6 +292,56 @@ void SpaceGame::CheckCollisions() {
 			}
 		}
 	}
+}
+
+void SpaceGame::CreateExplosion(const Vector2& position, const Color& color, int particleCount) {
+	ParticleSystem& particleSystem = engine.GetPS();
+
+	for (int i = 0; i < particleCount; i++) {
+		Particle particle;
+
+		particle.position = position;
+		particle.color = color;
+
+		particle.lifespan = RandomFloat(0.5f, 2.0f);
+
+		particle.velocity = Vector2 {
+			RandomFloat(-600.0f, 600.0f),
+			RandomFloat(-600.0f, 600.0f)
+		};
+
+		particleSystem.AddParticle(particle);
+	}
+}
+
+void SpaceGame::EmitPlayerParticle() {
+	if (a_player == nullptr || a_player->IsDestroyed()) { return; }
+
+	// only create trail while moving
+	if (a_player->GetVelocity().LengthSqr() <= 0.0f) { return; }
+
+	float rotation = a_player->GetTransform().rotation;
+	Vector2 forward{ 1.0f, 0.0f };
+	forward = forward.Rotate(rotation * DegToRad);
+	float trailDistance = a_player->GetCollisionRadius() + 20.0f;
+	Particle particle;
+
+	// Spawn the particle behind player
+	particle.position = a_player->GetTransform().position - (forward * trailDistance);
+
+	// Add a small random spread
+	particle.position.x += RandomFloat(-5.0f, 5.0f);
+	particle.position.y += RandomFloat(-5.0f, 5.0f);
+	particle.color = Color{ 0.4f, 0.8f, 1.0f };
+	particle.lifespan = RandomFloat(0.25f, 0.75f);
+
+	// Move mostly away from the back of the fish
+	particle.velocity = (forward * RandomFloat(-100.0f, -40.0f)) + Vector2{
+		RandomFloat(-30.0f, 30.0f),
+		RandomFloat(-30.0f, 30.0f)
+	};
+
+	engine.GetPS().AddParticle(particle);
 }
 
 void SpaceGame::Draw( const Renderer& renderer ) {
@@ -299,6 +357,8 @@ void SpaceGame::Draw( const Renderer& renderer ) {
 	}
 
 	Game::Draw(renderer);
+
+	engine.GetPS().Draw(renderer);
 
 	a_text.Draw( renderer, 400.0f, 400.0f );
 

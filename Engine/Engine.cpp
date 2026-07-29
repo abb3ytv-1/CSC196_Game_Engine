@@ -21,12 +21,21 @@ namespace nu {
 			return false;
 		}
 
+		if (!a_particleSystem.Initialize(5000)) {
+			a_audio.Shutdown();
+			a_input.Shutdown();
+			a_renderer.Shutdown();
+
+			return false;
+		}
+
 		a_time.Reset();
 
 		return true;
 	}
 
 	void Engine::Shutdown() {
+		a_particleSystem.Shutdown();
 		a_audio.Shutdown();
 		a_input.Shutdown();
 		a_renderer.Shutdown();
@@ -36,5 +45,7 @@ namespace nu {
 		a_input.Update();
 		a_time.Tick();
 		a_audio.Update();
+
+		a_particleSystem.Update(a_time.GetDeltaTime());
 	}
 }

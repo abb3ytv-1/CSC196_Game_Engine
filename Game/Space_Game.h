@@ -46,6 +46,8 @@ namespace nu {
 		void HandleShooting();
 		void HandleMouseInput();
 		void CheckCollisions();
+		void CreateExplosion(const Vector2& position, const Color& color, int particleCount = 100);
+		void EmitPlayerParticle();
 
 	private:
 		Scene a_gameScene;

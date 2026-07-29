@@ -9,7 +9,13 @@
 using namespace nu;
 
 namespace {
-	Model CreateFishModel( const Color& bodyColor, const Color& tailColor, const Color& topFinColor, const Color& sideFinColor, const Color& eyeColor ) {
+	Model CreateFishModel(
+		const Color& bodyColor,
+		const Color& tailColor,
+		const Color& topFinColor,
+		const Color& sideFinColor,
+		const Color& eyeColor
+	) {
 		std::vector<Vector2> bodyPoints{
 			Vector2{ -6.0f, 0.0f },
 			Vector2{ -3.0f, -3.0f },
@@ -50,11 +56,30 @@ namespace {
 			Vector2{ 4.0f, -1.0f }
 		};
 
-		Mesh bodyMesh{ bodyPoints, bodyColor };
-		Mesh tailMesh{ tailPoints, tailColor };
-		Mesh topFinMesh{ topFinPoints, topFinColor };
-		Mesh sideFinMesh{ sideFinPoints, sideFinColor };
-		Mesh eyeMesh{ eyePoints, eyeColor };
+		Mesh bodyMesh{
+			bodyPoints,
+			bodyColor
+		};
+
+		Mesh tailMesh{
+			tailPoints,
+			tailColor
+		};
+
+		Mesh topFinMesh{
+			topFinPoints,
+			topFinColor
+		};
+
+		Mesh sideFinMesh{
+			sideFinPoints,
+			sideFinColor
+		};
+
+		Mesh eyeMesh{
+			eyePoints,
+			eyeColor
+		};
 
 		Model model;
 
@@ -88,6 +113,57 @@ Model nu::CreateEnemyModel() {
 	);
 }
 
+Model nu::CreateFastEnemyModel() {
+	std::vector<Vector2> bodyPoints{
+		Vector2{ -5.0f, 0.0f },
+		Vector2{ -2.0f, -2.0f },
+		Vector2{ 3.0f, -2.0f },
+		Vector2{ 7.0f, 0.0f },
+		Vector2{ 3.0f, 2.0f },
+		Vector2{ -2.0f, 2.0f },
+		Vector2{ -5.0f, 0.0f }
+	};
+
+	std::vector<Vector2> tailPoints{
+		Vector2{ -5.0f, 0.0f },
+		Vector2{ -8.0f, -3.0f },
+		Vector2{ -7.0f, 0.0f },
+		Vector2{ -8.0f, 3.0f },
+		Vector2{ -5.0f, 0.0f }
+	};
+
+	std::vector<Vector2> eyePoints{
+		Vector2{ 4.0f, -1.0f },
+		Vector2{ 5.0f, -1.0f },
+		Vector2{ 5.0f, 0.0f },
+		Vector2{ 4.0f, 0.0f },
+		Vector2{ 4.0f, -1.0f }
+	};
+
+	Mesh bodyMesh{
+		bodyPoints,
+		Color{ 0.75f, 0.2f, 1.0f }
+	};
+
+	Mesh tailMesh{
+		tailPoints,
+		Color{ 1.0f, 0.25f, 0.75f }
+	};
+
+	Mesh eyeMesh{
+		eyePoints,
+		Color{ 1.0f, 1.0f, 1.0f }
+	};
+
+	Model model;
+
+	model.AddMesh(bodyMesh);
+	model.AddMesh(tailMesh);
+	model.AddMesh(eyeMesh);
+
+	return model;
+}
+
 Model nu::CreateBulletModel() {
 	std::vector<Vector2> bulletPoints{
 		Vector2{ -1.0f, -1.0f },
@@ -102,6 +178,7 @@ Model nu::CreateBulletModel() {
 	};
 
 	Model bulletModel;
+
 	bulletModel.AddMesh(bulletMesh);
 
 	return bulletModel;

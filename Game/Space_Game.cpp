@@ -44,51 +44,31 @@ int SpaceGame::Run() {
 
 	return 0;
 }
+
 bool SpaceGame::Initialize() {
 	if (!Game::Initialize()) {
 		return false;
+		a_scene = &a_gameScene;
+		if (!SetWorkingDirectory("Assets")) { return false; }
+
+		LoadHighScore();
+
+		if (!a_font.Load("Fonts/New Moon.ttf", 48.0f)) { return false; }
+		std::string titleMessage = "Fishy Space Adventure | High Score: " + std::to_string(a_highScore) + " | Press Enter to Start";
+		if (!a_stateText.Create(engine.GetRenderer(), titleMessage, Color{ 0.45f, 0.85f, 1.0f })) { return false; }
+		std::string hudMessage = "Score: 0 | High Score: " + std::to_string(a_highScore) + " | Lives: 3 | Level: 1";
+		if (!a_hudText.Create(engine.GetRenderer(), hudMessage, Color{ 1.0f, 1.0f, 1.0f })) { return false; }
+		if (!LoadAudio()) { return false; }
+
+		a_playerModel = CreatePlayerModel();
+		a_enemyModel = CreateEnemyModel();
+		a_fastEnemyModel = CreateFastEnemyModel();
+		a_bulletModel = CreateBulletModel();
+
+		a_gameState = GameState::StartGame;
+
+		return true;
 	}
-
-	a_scene = &a_gameScene;
-
-	if (!SetWorkingDirectory("Assets")) {
-		return false;
-	}
-
-	if (!a_font.Load(
-		"Fonts/New Moon.ttf",
-		48.0f
-	)) {
-		return false;
-	}
-
-	if (!a_stateText.Create(
-		engine.GetRenderer(),
-		"Fishy Adventure - Press Enter to Start",
-		Color{ 0.45f, 0.85f, 1.0f }
-	)) {
-		return false;
-	}
-
-	if (!a_hudText.Create(
-		engine.GetRenderer(),
-		"Score: 0 | Lives: 3",
-		Color{ 1.0f, 1.0f, 1.0f }
-	)) {
-		return false;
-	}
-
-	if (!LoadAudio()) {
-		return false;
-	}
-
-	a_playerModel = CreatePlayerModel();
-	a_enemyModel = CreateEnemyModel();
-	a_bulletModel = CreateBulletModel();
-
-	a_gameState = GameState::StartGame;
-
-	return true;
 }
 
 bool SpaceGame::LoadAudio() {
@@ -125,14 +105,27 @@ void SpaceGame::CreateActors() {
 	AddEnemy( Vector2{ 400.0f, 900.0f }, 75.0f );
 }
 
-void SpaceGame::AddEnemy( const Vector2& position, float speed ) {
+void SpaceGame::AddEnemy(
+	const Vector2& position, float speed ) {
 	if (a_player == nullptr) { return; }
 
 	auto enemy = std::make_unique<Enemy>( Transform{ position, 0.0f, 8.0f }, a_enemyModel, speed );
 
 	enemy->SetTarget(*a_player);
+	enemy->SetCollisionRadius(8.0f);
 
-	a_gameScene.AddActor( std::move(enemy) );
+	a_gameScene.AddActor(std::move(enemy));
+}
+
+void SpaceGame::AddFastEnemy( const Vector2& position, float speed ) {
+	if (a_player == nullptr) { return; }
+
+	auto enemy = std::make_unique<Enemy>( Transform{ position, 0.0f, 6.0f }, a_fastEnemyModel, speed );
+
+	enemy->SetTarget(*a_player);
+	enemy->SetCollisionRadius(6.0f);
+
+	a_gameScene.AddActor(std::move(enemy));
 }
 
 void SpaceGame::ProcessEvents() {
@@ -160,7 +153,12 @@ void SpaceGame::Update(float dt) {
 		break;
 
 	case GameState::StartLevel:
-		a_gameState = GameState::Game;
+		a_levelStartTimer -= dt;
+
+		if (a_levelStartTimer <= 0.0f) {
+			SpawnLevelEnemies();
+			a_gameState = GameState::Game;
+		}
 		break;
 
 	case GameState::Game:
@@ -366,6 +364,7 @@ void SpaceGame::CheckCollisions() {
 		StartNextLevel();
 	}
 }
+
 void SpaceGame::CreateExplosion(const Vector2& position, const Color& color, int particleCount) {
 	ParticleSystem& particleSystem = engine.GetPS();
 
@@ -437,7 +436,13 @@ void SpaceGame::StartNewGame() {
 void SpaceGame::EndGame() {
 	a_gameScene.RemoveAll();
 	a_player = nullptr;
-	std::string message = "Game Over | Score: " + std::to_string(a_score) + " | Press Enter to Play Again";
+
+	if (a_score > a_highScore) {
+		a_highScore = a_score;
+		SaveHighScore();
+	}
+
+	std::string message = "Game Over | Score: " + std::to_string(a_score) + " | High Score: " + std::to_string(a_highScore) + " | Press Enter to Play Again";
 	a_stateText.Create( engine.GetRenderer(), message, Color{ 1.0f, 0.25f, 0.25f } );
 	a_gameState = GameState::GameOver;
 }
@@ -454,26 +459,62 @@ bool SpaceGame::HasActiveEnemies() const {
 
 void SpaceGame::StartNextLevel() {
 	a_level++;
+	a_levelStartTimer = 2.0f;
 
+	std::string message =
+		"Level " + std::to_string(a_level);
+
+	a_stateText.Create(
+		engine.GetRenderer(),
+		message,
+		Color{ 0.45f, 0.85f, 1.0f }
+	);
+
+	UpdateHUDText();
+
+	a_gameState = GameState::StartLevel;
+}
+
+void SpaceGame::SpawnLevelEnemies() {
 	Renderer& renderer = engine.GetRenderer();
 
 	int enemyCount = a_level + 2;
-	float enemySpeed = 75.0f + (a_level * 20.0f);
+
+	float normalEnemySpeed = 75.0f + (a_level * 20.0f);
+
+	float fastEnemySpeed = normalEnemySpeed * 1.75f;
 
 	for (int i = 0; i < enemyCount; i++) {
-		Vector2 posotion{ RandomFloat(100.0f, static_cast<float>(renderer.GetWidth() - 100)) };
+		Vector2 position{ RandomFloat( 100.0f, static_cast<float>( renderer.GetWidth() - 100 ) ),
+			RandomFloat( 100.0f, static_cast<float>( renderer.GetHeight() - 100 ))
+		};
 
-		AddEnemy(posotion, enemySpeed);
+		// Every third enemy is a fast enemy,
+		// beginning on level two.
+		if (a_level >= 2 && i % 3 == 0) {
+			AddFastEnemy( position, fastEnemySpeed );
+		}
+		else {
+			AddEnemy( position, normalEnemySpeed );
+		}
 	}
-
-	UpdateHUDText();
 }
 
 void SpaceGame::UpdateHUDText() {
-	std::string hud = "Score: " + std::to_string(a_score) + " | Lives: " + std::to_string(a_lives) + " | Level: " + std::to_string(a_level);
-
-	a_hudText.Create(engine.GetRenderer(), hud, Color{ 1.0f, 1.0f, 1.0f });
+	std::string hud = "Score: " + std::to_string(a_score) + " | High Score: " + std::to_string(a_highScore) + " | Lives: " + std::to_string(a_lives) + " | Level: " + std::to_string(a_level);
+	a_hudText.Create( engine.GetRenderer(), hud, Color{ 1.0f, 1.0f, 1.0f } );
 }
+
+void SpaceGame::LoadHighScore() {
+	std::string data;
+
+	if (!ReadTextFile("highscore.txt", data)) { a_highScore = 0; return; }
+
+	try { a_highScore = std::stoi(data); }
+	catch (...) { a_highScore = 0; }
+}
+
+void SpaceGame::SaveHighScore() { WriteTextFile("highscore.txt", std::to_string(a_highScore), false); }
 
 void SpaceGame::Draw( const Renderer& renderer ) {
 	renderer.SetColor(0, 0, 0, 255);
@@ -486,7 +527,13 @@ void SpaceGame::Draw( const Renderer& renderer ) {
 		break;
 
 	case GameState::StartLevel:
-		a_stateText.Draw( renderer, 800.0f, 500.0f );
+		engine.GetPS().Draw(renderer);
+
+		a_stateText.Draw(
+			renderer,
+			800.0f,
+			500.0f
+		);
 		break;
 
 	case GameState::Game:

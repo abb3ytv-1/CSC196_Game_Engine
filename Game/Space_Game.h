@@ -47,6 +47,10 @@ namespace nu {
 		void UpdateHUDText();
 		void StartNextLevel();
 		bool HasActiveEnemies() const;
+		void SpawnLevelEnemies();
+		void AddFastEnemy( const Vector2& position, float speed );
+		void LoadHighScore();
+		void SaveHighScore();
 
 		int a_level{ 1 };
 		float a_levelStartTimer{ 0.0f };
@@ -57,6 +61,7 @@ namespace nu {
 		Model a_playerModel;
 		Model a_enemyModel;
 		Model a_bulletModel;
+		Model a_fastEnemyModel;
 
 		Player* a_player{ nullptr };
 
@@ -68,6 +73,7 @@ namespace nu {
 		std::vector<bool> a_startsNewShape;
 
 		int a_score{ 0 };
+		int a_highScore{ 0 };
 		int a_lives{ 3 };
 
 		float a_rotationSpeed{ 180.0f };

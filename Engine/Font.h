@@ -6,18 +6,18 @@ struct TTF_Font;
 
 namespace nu {
 	class Font {
+		friend class Text;
+
 	public:
 		Font() = default;
 		~Font();
 
-		Font(const Font&) = delete;
-		Font& operator=(const Font&) = delete;
-
-		bool Load( const std::string& filename, float fontSize );
+		bool Load(
+			const std::string& filename,
+			float fontSize
+		);
 
 	private:
-		friend class Text;
-
 		TTF_Font* a_ttfFont{ nullptr };
 	};
 }

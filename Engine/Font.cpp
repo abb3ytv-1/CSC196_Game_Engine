@@ -15,26 +15,32 @@ Font::~Font() {
 	}
 }
 
-bool Font::Load( const std::string& filename, float fontSize ) {
-	TTF_Font* newFont = TTF_OpenFont( filename.c_str(), fontSize );
+bool Font::Load(
+	const std::string& filename,
+	float fontSize
+) {
+	if (a_ttfFont != nullptr) {
+		TTF_CloseFont(a_ttfFont);
+		a_ttfFont = nullptr;
+	}
 
-	if (newFont == nullptr) {
+	// Do not put "TTF_Font*" before a_ttfFont here.
+	// We are assigning the class member.
+	a_ttfFont = TTF_OpenFont(
+		filename.c_str(),
+		fontSize
+	);
+
+	if (a_ttfFont == nullptr) {
 		std::cerr
 			<< "Could not load font: "
 			<< filename
-			<< ": "
+			<< '\n'
 			<< SDL_GetError()
 			<< '\n';
 
 		return false;
 	}
-
-	// Close the previous font if Load is called again.
-	if (a_ttfFont != nullptr) {
-		TTF_CloseFont(a_ttfFont);
-	}
-
-	a_ttfFont = newFont;
 
 	return true;
 }

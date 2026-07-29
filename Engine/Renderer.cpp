@@ -12,24 +12,54 @@
 using namespace nu;
 
 // Initialize
-bool Renderer::Initialize(const char* name, int width, int height)
-{
+bool Renderer::Initialize( const char* name, int width, int height ) {
 	a_width = width;
 	a_height = height;
 
-	SDL_Init(SDL_INIT_VIDEO);
+	if (!SDL_Init(SDL_INIT_VIDEO)) {
+		std::cerr
+			<< "SDL initialization failed: "
+			<< SDL_GetError()
+			<< '\n';
 
-	m_window = SDL_CreateWindow(name, width, height, 0);
-	if (m_window == nullptr) {
-		std::cerr << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
+		return false;
+	}
+
+	if (!TTF_Init()) {
+		std::cerr
+			<< "SDL_ttf initialization failed: "
+			<< SDL_GetError()
+			<< '\n';
+
 		SDL_Quit();
 		return false;
 	}
 
-	a_renderer = SDL_CreateRenderer(m_window, NULL);
+	a_window = SDL_CreateWindow( name, width, height, 0 );
+
+	if (a_window == nullptr) {
+		std::cerr
+			<< "Window creation failed: "
+			<< SDL_GetError()
+			<< '\n';
+
+		TTF_Quit();
+		SDL_Quit();
+		return false;
+	}
+
+	a_renderer = SDL_CreateRenderer( a_window, nullptr );
+
 	if (a_renderer == nullptr) {
-		std::cerr << "SDL_CreateRenderer Error: " << SDL_GetError() << std::endl;
-		SDL_DestroyWindow(m_window);
+		std::cerr
+			<< "Renderer creation failed: "
+			<< SDL_GetError()
+			<< '\n';
+
+		SDL_DestroyWindow(a_window);
+		a_window = nullptr;
+
+		TTF_Quit();
 		SDL_Quit();
 		return false;
 	}
@@ -39,12 +69,14 @@ bool Renderer::Initialize(const char* name, int width, int height)
 	return true;
 }
 
-// Shutdown
-void Renderer::Shutdown()
-{
-	TTF_Quit();
+void Renderer::Shutdown() {
 	SDL_DestroyRenderer(a_renderer);
-	SDL_DestroyWindow(m_window);
+	SDL_DestroyWindow(a_window);
+
+	a_renderer = nullptr;
+	a_window = nullptr;
+
+	TTF_Quit();
 	SDL_Quit();
 }
 

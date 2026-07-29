@@ -8,7 +8,7 @@
 namespace nu {
 	bool Audio::Initialize() {
 		FMOD_RESULT result =
-			FMOD::System_Create(&m_fmodSystem);
+			FMOD::System_Create(&a_fmodSystem);
 
 		if (!CheckFMODResult(result)) {
 			return false;
@@ -16,15 +16,15 @@ namespace nu {
 
 		void* extraDriverData = nullptr;
 
-		result = m_fmodSystem->init(
+		result = a_fmodSystem->init(
 			32,
 			FMOD_INIT_NORMAL,
 			extraDriverData
 		);
 
 		if (!CheckFMODResult(result)) {
-			m_fmodSystem->release();
-			m_fmodSystem = nullptr;
+			a_fmodSystem->release();
+			a_fmodSystem = nullptr;
 
 			return false;
 		}
@@ -34,7 +34,7 @@ namespace nu {
 
 	void Audio::Shutdown() {
 		// Release all loaded sounds.
-		for (auto& soundPair : m_sounds) {
+		for (auto& soundPair : a_sounds) {
 			FMOD::Sound* sound = soundPair.second;
 
 			if (sound != nullptr) {
@@ -42,20 +42,20 @@ namespace nu {
 			}
 		}
 
-		m_sounds.clear();
+		a_sounds.clear();
 
-		if (m_fmodSystem != nullptr) {
-			CheckFMODResult(m_fmodSystem->close());
-			CheckFMODResult(m_fmodSystem->release());
+		if (a_fmodSystem != nullptr) {
+			CheckFMODResult(a_fmodSystem->close());
+			CheckFMODResult(a_fmodSystem->release());
 
-			m_fmodSystem = nullptr;
+			a_fmodSystem = nullptr;
 		}
 	}
 
 	void Audio::Update() {
-		if (m_fmodSystem != nullptr) {
+		if (a_fmodSystem != nullptr) {
 			CheckFMODResult(
-				m_fmodSystem->update()
+				a_fmodSystem->update()
 			);
 		}
 	}
@@ -65,7 +65,7 @@ namespace nu {
 		const std::string& filename
 	) {
 		// Check whether the sound name already exists.
-		if (m_sounds.find(name) != m_sounds.end()) {
+		if (a_sounds.find(name) != a_sounds.end()) {
 			std::cerr
 				<< "Audio System: name already exists: "
 				<< name
@@ -74,14 +74,14 @@ namespace nu {
 			return false;
 		}
 
-		if (m_fmodSystem == nullptr) {
+		if (a_fmodSystem == nullptr) {
 			return false;
 		}
 
 		FMOD::Sound* sound = nullptr;
 
 		FMOD_RESULT result =
-			m_fmodSystem->createSound(
+			a_fmodSystem->createSound(
 				filename.c_str(),
 				FMOD_DEFAULT,
 				nullptr,
@@ -93,15 +93,15 @@ namespace nu {
 		}
 
 		// Store the sound pointer using its descriptive name.
-		m_sounds[name] = sound;
+		a_sounds[name] = sound;
 
 		return true;
 	}
 
 	bool Audio::PlaySound(const std::string& name) {
-		auto soundIterator = m_sounds.find(name);
+		auto soundIterator = a_sounds.find(name);
 
-		if (soundIterator == m_sounds.end()) {
+		if (soundIterator == a_sounds.end()) {
 			std::cerr
 				<< "Audio System: name does not exist: "
 				<< name
@@ -110,12 +110,12 @@ namespace nu {
 			return false;
 		}
 
-		if (m_fmodSystem == nullptr) {
+		if (a_fmodSystem == nullptr) {
 			return false;
 		}
 
 		FMOD_RESULT result =
-			m_fmodSystem->playSound(
+			a_fmodSystem->playSound(
 				soundIterator->second,
 				nullptr,
 				false,

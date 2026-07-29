@@ -1,5 +1,9 @@
 #pragma once
 
-#include "../Engine/Mesh.h"
+#include "../Engine/Model.h"
 
-extern nu::Mesh bulletMesh;
+namespace nu {
+	Model CreatePlayerModel();
+	Model CreateEnemyModel();
+	Model CreateBulletModel();
+}

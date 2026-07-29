@@ -19,17 +19,21 @@ namespace nu {
 			const std::string& filename
 		);
 
-		bool PlaySound(const std::string& name);
+		bool PlaySound(
+			const std::string& name
+		);
 
 	private:
-		bool CheckFMODResult(FMOD_RESULT result);
+		bool CheckFMODResult(
+			FMOD_RESULT result
+		);
 
 	private:
-		FMOD::System* m_fmodSystem = nullptr;
+		FMOD::System* a_fmodSystem{ nullptr };
 
 		std::map<
 			std::string,
 			FMOD::Sound*
-		> m_sounds;
+		> a_sounds;
 	};
 }

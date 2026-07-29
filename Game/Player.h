@@ -1,17 +1,40 @@
 #pragma once
+
 #include "Actor.h"
 
-class Player : public nu::Actor {
+namespace nu {
+	class Player : public Actor {
 	public:
 		Player() = default;
-		Player(float speed, const nu::Transform& transform) : Actor{ transform }, a_speed{ speed } {}
-		Player(float speed, const nu::Transform& transform, const nu::Model& model) : Actor{ transform, model }, a_speed{ speed } {}
 
-		void Update(float dt) override;
-		void Draw(const class nu::Renderer& renderer) const override;
+		Player(
+			const Transform& transform,
+			const Model& model,
+			float speed = 300.0f
+		);
 
+		void SetSpeed(float speed) {
+			a_speed = speed;
+		}
+
+		float GetSpeed() const {
+			return a_speed;
+		}
+
+		void SetAmmo(int ammo) {
+			a_ammo = ammo;
+		}
+
+		int GetAmmo() const {
+			return a_ammo;
+		}
+
+		void AddAmmo(int amount) {
+			a_ammo += amount;
+		}
 
 	private:
-		int a_amo = 0;
-		float a_speed = 0.0f;
-};
+		float a_speed{ 300.0f };
+		int a_ammo{ 0 };
+	};
+}

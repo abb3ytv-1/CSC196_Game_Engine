@@ -2,16 +2,11 @@
 
 #include "Actor.h"
 
-class Bullet : public nu::Actor {
-public:
-	Bullet() = default;
+namespace nu {
+	class Bullet : public Actor {
+	public:
+		Bullet() = default;
 
-	Bullet(
-		const nu::Transform& transform,
-		const nu::Model& model,
-		float speed = 700.0f,
-		float lifespan = 2.0f
-	);
-
-	void Update(float dt) override;
-};
+		Bullet( const Transform& transform, const Model& model, float speed = 700.0f, float lifespan = 2.0f );
+	};
+}

@@ -1,24 +1,9 @@
 #pragma once
 
+#include "Audio.h"
+#include "GameTime.h"
 #include "Input.h"
 #include "Renderer.h"
-#include "Random.h"
-#include "Vector2.h"
-#include "Vector3.h"
-#include "GameTime.h"
-#include "MathUtils.h"
-#include "Transform.h"
-#include "Actor.h"
-#include "Enemy.h"
-#include "Scene.h"
-#include "AudioSystem.h"
-#include "File.h"
-#include "Text.h"
-#include "Game.h"
-
-#include <SDL3/SDL.h>
-#include <iostream>
-#include <vector>
 
 namespace nu {
 	class Engine {
@@ -41,7 +26,7 @@ namespace nu {
 			return a_time;
 		}
 
-		AudioSystem& GetAudio() {
+		Audio& GetAudio() {
 			return a_audio;
 		}
 
@@ -49,7 +34,7 @@ namespace nu {
 		Input a_input;
 		Renderer a_renderer;
 		Time a_time;
-		AudioSystem a_audio;
+		Audio a_audio;
 	};
 
 	extern Engine engine;

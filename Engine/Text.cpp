@@ -78,7 +78,7 @@ namespace nu {
 	}
 
 	void Text::Draw(
-		Renderer& renderer,
+		const Renderer& renderer,
 		float x,
 		float y
 	) {

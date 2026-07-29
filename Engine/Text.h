@@ -26,7 +26,7 @@ namespace nu {
 		);
 
 		void Draw(
-			Renderer& renderer,
+			const Renderer& renderer,
 			float x,
 			float y
 		);

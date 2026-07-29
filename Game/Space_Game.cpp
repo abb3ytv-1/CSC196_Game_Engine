@@ -116,17 +116,21 @@ void SpaceGame::ProcessEvents() {
 			a_quit = true;
 		}
 
-		if ( event.type == SDL_EVENT_KEY_DOWN && event.key.scancode == SDL_SCANCODE_ESCAPE ) { a_quit = true; }
+		if (event.type == SDL_EVENT_KEY_DOWN) {
+			if ( event.key.scancode == SDL_SCANCODE_ESCAPE ) { a_quit = true; }
+
+			bool enterPressed = event.key.scancode == SDL_SCANCODE_RETURN || event.key.scancode == SDL_SCANCODE_KP_ENTER;
+			bool canStart = a_gameState == GameState::StartGame || a_gameState == GameState::GameOver;
+
+			if (enterPressed && canStart) { StartNewGame(); }
+		}
 	}
 }
 
 void SpaceGame::Update(float dt) {
-	Input& input = engine.GetInput();
-
 	switch (a_gameState) {
 	case GameState::Title:
 	case GameState::StartGame:
-		if (input.GetKeyPress(SDL_SCANCODE_RETURN)) { StartNewGame(); }
 		break;
 
 	case GameState::StartLevel:
@@ -149,7 +153,6 @@ void SpaceGame::Update(float dt) {
 		break;
 
 	case GameState::GameOver:
-		if (input.GetKeyPress(SDL_SCANCODE_RETURN)) { StartNewGame(); }
 		break;
 
 	default:
@@ -271,19 +274,21 @@ void SpaceGame::HandleMouseInput() {
 }
 
 void SpaceGame::CheckCollisions() {
-	for ( auto& actor : a_gameScene.GetActors() ) {
+	auto& actors = a_gameScene.GetActors();
+
+	// Bullet and enemy collisions
+	for (auto& actor : actors) {
 		Bullet* bullet = dynamic_cast<Bullet*>( actor.get() );
 
 		if ( bullet == nullptr || bullet->IsDestroyed() ) { continue; }
 
-		for ( auto& otherActor : a_gameScene.GetActors() ) {
+		for (auto& otherActor : actors) {
 			Enemy* enemy = dynamic_cast<Enemy*>( otherActor.get() );
 
 			if ( enemy == nullptr || enemy->IsDestroyed() ) { continue; }
 
 			if (bullet->IsColliding(*enemy)) {
-				Vector2 explosionPosition =
-					enemy->GetTransform().position;
+				Vector2 explosionPosition = enemy->GetTransform().position;
 
 				bullet->Destroy();
 				enemy->Destroy();
@@ -295,45 +300,45 @@ void SpaceGame::CheckCollisions() {
 
 				break;
 			}
-
-			if ( a_player == nullptr || a_player->IsDestroyed() || a_playerInvincibilityTimer > 0.0f ) { return; }
-
-			for (auto& actor : a_gameScene.GetActors()) {
-				Enemy* enemy = dynamic_cast<Enemy*>( actor.get() );
-
-				if ( enemy == nullptr || enemy->IsDestroyed() ) { continue; }
-
-				if (!a_player->IsColliding(*enemy)) { continue; }
-
-				Vector2 collisionPosition = enemy->GetTransform().position;
-
-				enemy->Destroy();
-
-				CreateExplosion( collisionPosition, Color{ 1.0f, 0.2f, 0.2f }, 75 );
-
-				a_lives--;
-				UpdateHUDText();
-
-				if (a_lives <= 0) { EndGame(); return; }
-
-				// Return the player to the center.
-				Renderer& renderer = engine.GetRenderer();
-
-				a_player->SetPosition( Vector2{ renderer.GetWidth() * 0.5f, renderer.GetHeight() * 0.5f } );
-
-				a_player->SetVelocity( Vector2{ 0.0f, 0.0f } );
-
-				a_player->SetRotation(0.0f);
-
-				// Prevent another immediate collision.
-				a_playerInvincibilityTimer = 1.5f;
-
-				break;
-			}
 		}
 	}
-}
 
+	// Player and enemy collisions
+	if ( a_player == nullptr || a_player->IsDestroyed() || a_playerInvincibilityTimer > 0.0f ) { return; }
+
+	bool gameOver = false;
+
+	for (auto& actor : actors) {
+		Enemy* enemy = dynamic_cast<Enemy*>( actor.get() );
+
+		if ( enemy == nullptr || enemy->IsDestroyed() ) { continue; }
+
+		if (!a_player->IsColliding(*enemy)) { continue; }
+
+		Vector2 collisionPosition = enemy->GetTransform().position;
+
+		enemy->Destroy();
+
+		CreateExplosion( collisionPosition, Color{ 1.0f, 0.2f, 0.2f }, 75 );
+
+		a_lives--;
+		UpdateHUDText();
+
+		if (a_lives <= 0) { gameOver = true; break; }
+
+		Renderer& renderer = engine.GetRenderer();
+
+		a_player->SetPosition( Vector2{ renderer.GetWidth() * 0.5f, renderer.GetHeight() * 0.5f } );
+		a_player->SetVelocity( Vector2{ 0.0f, 0.0f } );
+		a_player->SetRotation(0.0f);
+		a_playerInvincibilityTimer = 1.5f;
+		break;
+	}
+
+	if (gameOver) {
+		EndGame();
+	}
+}
 void SpaceGame::CreateExplosion(const Vector2& position, const Color& color, int particleCount) {
 	ParticleSystem& particleSystem = engine.GetPS();
 

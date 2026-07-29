@@ -25,20 +25,15 @@ namespace nu {
 	public:
 		SpaceGame();
 		int Run();
-
 		bool Initialize() override;
 		void Shutdown() override;
-
 		void Update(float dt) override;
-
 		void Draw(const Renderer& renderer) override;
 
 	private:
 		bool LoadAudio();
 		void CreateActors();
-
 		void AddEnemy(const Vector2& position, float speed);
-
 		void ProcessEvents();
 		void HandleAudioInput();
 		void HandlePlayerInput(float dt);
@@ -50,6 +45,11 @@ namespace nu {
 		void StartNewGame();
 		void EndGame();
 		void UpdateHUDText();
+		void StartNextLevel();
+		bool HasActiveEnemies() const;
+
+		int a_level{ 1 };
+		float a_levelStartTimer{ 0.0f };
 
 	private:
 		Scene a_gameScene;

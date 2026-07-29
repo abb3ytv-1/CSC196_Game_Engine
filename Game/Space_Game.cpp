@@ -44,21 +44,48 @@ int SpaceGame::Run() {
 
 	return 0;
 }
-
 bool SpaceGame::Initialize() {
-	if (!Game::Initialize()) { return false; }
+	if (!Game::Initialize()) {
+		return false;
+	}
 
 	a_scene = &a_gameScene;
 
-	if (!SetWorkingDirectory("Assets")) { return false; }
-	if (!a_font.Load( "Fonts/New Moon.ttf", 100.0f )) { return false; }
-	if (!a_stateText.Create(engine.GetRenderer(), "Fishy Adventure - Press Enter to Start", Color{ 0.45f, 0.85f, 1.0f })) { return false; }
-	if (!a_hudText.Create(engine.GetRenderer(), "Score: 0 | Lives: 3", Color{ 1.0f, 1.0f, 1.0f })){return false;}
-	if (!LoadAudio()) { return false; }
+	if (!SetWorkingDirectory("Assets")) {
+		return false;
+	}
+
+	if (!a_font.Load(
+		"Fonts/New Moon.ttf",
+		48.0f
+	)) {
+		return false;
+	}
+
+	if (!a_stateText.Create(
+		engine.GetRenderer(),
+		"Fishy Adventure - Press Enter to Start",
+		Color{ 0.45f, 0.85f, 1.0f }
+	)) {
+		return false;
+	}
+
+	if (!a_hudText.Create(
+		engine.GetRenderer(),
+		"Score: 0 | Lives: 3",
+		Color{ 1.0f, 1.0f, 1.0f }
+	)) {
+		return false;
+	}
+
+	if (!LoadAudio()) {
+		return false;
+	}
 
 	a_playerModel = CreatePlayerModel();
 	a_enemyModel = CreateEnemyModel();
 	a_bulletModel = CreateBulletModel();
+
 	a_gameState = GameState::StartGame;
 
 	return true;
@@ -112,17 +139,14 @@ void SpaceGame::ProcessEvents() {
 	SDL_Event event;
 
 	while (SDL_PollEvent(&event)) {
-		if (event.type == SDL_EVENT_QUIT) {
-			a_quit = true;
-		}
-
+		if (event.type == SDL_EVENT_QUIT) { a_quit = true; continue; }
 		if (event.type == SDL_EVENT_KEY_DOWN) {
-			if ( event.key.scancode == SDL_SCANCODE_ESCAPE ) { a_quit = true; }
+			if ( event.key.scancode == SDL_SCANCODE_ESCAPE ) { a_quit = true; continue; }
 
 			bool enterPressed = event.key.scancode == SDL_SCANCODE_RETURN || event.key.scancode == SDL_SCANCODE_KP_ENTER;
-			bool canStart = a_gameState == GameState::StartGame || a_gameState == GameState::GameOver;
+			bool canStartGame = a_gameState == GameState::Title || a_gameState == GameState::StartGame || a_gameState == GameState::GameOver;
 
-			if (enterPressed && canStart) { StartNewGame(); }
+			if (enterPressed && canStartGame) { StartNewGame(); }
 		}
 	}
 }
@@ -130,6 +154,8 @@ void SpaceGame::ProcessEvents() {
 void SpaceGame::Update(float dt) {
 	switch (a_gameState) {
 	case GameState::Title:
+		break;
+
 	case GameState::StartGame:
 		break;
 
@@ -138,17 +164,13 @@ void SpaceGame::Update(float dt) {
 		break;
 
 	case GameState::Game:
-		if (a_playerInvincibilityTimer > 0.0f) {
-			a_playerInvincibilityTimer -= dt;
-		}
+		if (a_playerInvincibilityTimer > 0.0f) { a_playerInvincibilityTimer -= dt; }
 
 		HandleAudioInput();
 		HandlePlayerInput(dt);
 		EmitPlayerParticle();
 		HandleMouseInput();
-
 		Game::Update(dt);
-
 		CheckCollisions();
 		break;
 
@@ -337,6 +359,11 @@ void SpaceGame::CheckCollisions() {
 
 	if (gameOver) {
 		EndGame();
+		return;
+	}
+
+	if (!HasActiveEnemies()) {
+		StartNextLevel();
 	}
 }
 void SpaceGame::CreateExplosion(const Vector2& position, const Color& color, int particleCount) {
@@ -394,31 +421,56 @@ void SpaceGame::StartNewGame() {
 	a_player = nullptr;
 	a_score = 0;
 	a_lives = 3;
+	a_level = 1;
+	a_levelStartTimer = 0.0f;
+	a_playerInvincibilityTimer = 0.0f;
+
 	a_mousePoints.clear();
 	a_startsNewShape.clear();
-	a_playerInvincibilityTimer = 0.0f;
 
 	CreateActors();
 	UpdateHUDText();
-
+	
 	a_gameState = GameState::Game;
 }
 
 void SpaceGame::EndGame() {
 	a_gameScene.RemoveAll();
 	a_player = nullptr;
-
-	std::string message = "Game Over | Score: " +
-		std::to_string(a_score) +
-		" | Press Enter to Play Again";
-
-	a_stateText.Create(engine.GetRenderer(), message, Color{ 1.0f, 0.25, 0.25f });
-
+	std::string message = "Game Over | Score: " + std::to_string(a_score) + " | Press Enter to Play Again";
+	a_stateText.Create( engine.GetRenderer(), message, Color{ 1.0f, 0.25f, 0.25f } );
 	a_gameState = GameState::GameOver;
 }
 
+bool SpaceGame::HasActiveEnemies() const {
+	for (const auto& actor : a_gameScene.GetActors()) {
+		const Enemy* enemy = dynamic_cast<const Enemy*>(actor.get());
+
+		if (enemy != nullptr && !enemy->IsDestroyed()) { return true; }
+	}
+
+	return false;
+}
+
+void SpaceGame::StartNextLevel() {
+	a_level++;
+
+	Renderer& renderer = engine.GetRenderer();
+
+	int enemyCount = a_level + 2;
+	float enemySpeed = 75.0f + (a_level * 20.0f);
+
+	for (int i = 0; i < enemyCount; i++) {
+		Vector2 posotion{ RandomFloat(100.0f, static_cast<float>(renderer.GetWidth() - 100)) };
+
+		AddEnemy(posotion, enemySpeed);
+	}
+
+	UpdateHUDText();
+}
+
 void SpaceGame::UpdateHUDText() {
-	std::string hud = "Score: " + std::to_string(a_score) + " | Lives: " + std::to_string(a_lives);
+	std::string hud = "Score: " + std::to_string(a_score) + " | Lives: " + std::to_string(a_lives) + " | Level: " + std::to_string(a_level);
 
 	a_hudText.Create(engine.GetRenderer(), hud, Color{ 1.0f, 1.0f, 1.0f });
 }

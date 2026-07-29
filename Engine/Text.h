@@ -19,8 +19,11 @@ namespace nu {
 
 		~Text();
 
+		Text(const Text&) = delete;
+		Text& operator=(const Text&) = delete;
+
 		bool Create(
-			Renderer& renderer,
+			const Renderer& renderer,
 			const std::string& text,
 			const Color& color
 		);
@@ -32,7 +35,9 @@ namespace nu {
 		);
 
 	private:
+		// Text uses the font but does not own it.
 		Font* a_font{ nullptr };
+
 		SDL_Texture* a_texture{ nullptr };
 	};
 }

@@ -12,14 +12,14 @@
 #include "Player.h"
 
 #include <SDL3/SDL.h>
-
+#include <string>
 #include <memory>
 #include <utility>
 
 using namespace nu;
 
 SpaceGame::SpaceGame() :
-	a_text{ &a_font }
+	a_stateText{ &a_font }, a_hudText{ &a_font }
 {}
 
 int SpaceGame::Run() {
@@ -51,18 +51,15 @@ bool SpaceGame::Initialize() {
 	a_scene = &a_gameScene;
 
 	if (!SetWorkingDirectory("Assets")) { return false; }
-
-	if (!a_font.Load( "Fonts/New Moon.ttf", 20.0f )) { return false; }
-
-	if (!a_text.Create( engine.GetRenderer(), "Hello World", Color{ 1.0f, 1.0f, 1.0f } )) { return false; }
-
+	if (!a_font.Load( "Fonts/New Moon.ttf", 100.0f )) { return false; }
+	if (!a_stateText.Create(engine.GetRenderer(), "Fishy Adventure - Press Enter to Start", Color{ 0.45f, 0.85f, 1.0f })) { return false; }
+	if (!a_hudText.Create(engine.GetRenderer(), "Score: 0 | Lives: 3", Color{ 1.0f, 1.0f, 1.0f })){return false;}
 	if (!LoadAudio()) { return false; }
 
 	a_playerModel = CreatePlayerModel();
 	a_enemyModel = CreateEnemyModel();
 	a_bulletModel = CreateBulletModel();
-
-	CreateActors();
+	a_gameState = GameState::StartGame;
 
 	return true;
 }
@@ -124,17 +121,23 @@ void SpaceGame::ProcessEvents() {
 }
 
 void SpaceGame::Update(float dt) {
+	Input& input = engine.GetInput();
+
 	switch (a_gameState) {
 	case GameState::Title:
-		break;
-
 	case GameState::StartGame:
+		if (input.GetKeyPress(SDL_SCANCODE_RETURN)) { StartNewGame(); }
 		break;
 
 	case GameState::StartLevel:
+		a_gameState = GameState::Game;
 		break;
 
 	case GameState::Game:
+		if (a_playerInvincibilityTimer > 0.0f) {
+			a_playerInvincibilityTimer -= dt;
+		}
+
 		HandleAudioInput();
 		HandlePlayerInput(dt);
 		EmitPlayerParticle();
@@ -146,6 +149,7 @@ void SpaceGame::Update(float dt) {
 		break;
 
 	case GameState::GameOver:
+		if (input.GetKeyPress(SDL_SCANCODE_RETURN)) { StartNewGame(); }
 		break;
 
 	default:
@@ -287,6 +291,42 @@ void SpaceGame::CheckCollisions() {
 				CreateExplosion( explosionPosition, Color{ 1.0f, 0.65f, 0.2f }, 100 );
 
 				a_score++;
+				UpdateHUDText();
+
+				break;
+			}
+
+			if ( a_player == nullptr || a_player->IsDestroyed() || a_playerInvincibilityTimer > 0.0f ) { return; }
+
+			for (auto& actor : a_gameScene.GetActors()) {
+				Enemy* enemy = dynamic_cast<Enemy*>( actor.get() );
+
+				if ( enemy == nullptr || enemy->IsDestroyed() ) { continue; }
+
+				if (!a_player->IsColliding(*enemy)) { continue; }
+
+				Vector2 collisionPosition = enemy->GetTransform().position;
+
+				enemy->Destroy();
+
+				CreateExplosion( collisionPosition, Color{ 1.0f, 0.2f, 0.2f }, 75 );
+
+				a_lives--;
+				UpdateHUDText();
+
+				if (a_lives <= 0) { EndGame(); return; }
+
+				// Return the player to the center.
+				Renderer& renderer = engine.GetRenderer();
+
+				a_player->SetPosition( Vector2{ renderer.GetWidth() * 0.5f, renderer.GetHeight() * 0.5f } );
+
+				a_player->SetVelocity( Vector2{ 0.0f, 0.0f } );
+
+				a_player->SetRotation(0.0f);
+
+				// Prevent another immediate collision.
+				a_playerInvincibilityTimer = 1.5f;
 
 				break;
 			}
@@ -344,23 +384,79 @@ void SpaceGame::EmitPlayerParticle() {
 	engine.GetPS().AddParticle(particle);
 }
 
+void SpaceGame::StartNewGame() {
+	a_gameScene.RemoveAll();
+	a_player = nullptr;
+	a_score = 0;
+	a_lives = 3;
+	a_mousePoints.clear();
+	a_startsNewShape.clear();
+	a_playerInvincibilityTimer = 0.0f;
+
+	CreateActors();
+	UpdateHUDText();
+
+	a_gameState = GameState::Game;
+}
+
+void SpaceGame::EndGame() {
+	a_gameScene.RemoveAll();
+	a_player = nullptr;
+
+	std::string message = "Game Over | Score: " +
+		std::to_string(a_score) +
+		" | Press Enter to Play Again";
+
+	a_stateText.Create(engine.GetRenderer(), message, Color{ 1.0f, 0.25, 0.25f });
+
+	a_gameState = GameState::GameOver;
+}
+
+void SpaceGame::UpdateHUDText() {
+	std::string hud = "Score: " + std::to_string(a_score) + " | Lives: " + std::to_string(a_lives);
+
+	a_hudText.Create(engine.GetRenderer(), hud, Color{ 1.0f, 1.0f, 1.0f });
+}
+
 void SpaceGame::Draw( const Renderer& renderer ) {
 	renderer.SetColor(0, 0, 0, 255);
 	renderer.Clear();
 
-	renderer.SetColor(255, 255, 255, 255);
+	switch (a_gameState) {
+	case GameState::Title:
+	case GameState::StartGame:
+		a_stateText.Draw( renderer, 250.0f, 475.0f );
+		break;
 
-	for ( std::size_t i = 0; i + 1 < a_mousePoints.size(); i++ ) {
-		if (!a_startsNewShape[i + 1]) {
-			renderer.DrawLine( a_mousePoints[i].x, a_mousePoints[i].y, a_mousePoints[i + 1].x, a_mousePoints[i + 1].y );
+	case GameState::StartLevel:
+		a_stateText.Draw( renderer, 800.0f, 500.0f );
+		break;
+
+	case GameState::Game:
+		renderer.SetColor( 255, 255, 255, 255 );
+
+		for ( std::size_t i = 0; i + 1 < a_mousePoints.size(); i++ ) {
+			if (!a_startsNewShape[i + 1]) {
+				renderer.DrawLine( a_mousePoints[i].x, a_mousePoints[i].y, a_mousePoints[i + 1].x, a_mousePoints[i + 1].y );
+			}
 		}
+
+		Game::Draw(renderer);
+
+		engine.GetPS().Draw(renderer);
+
+		a_hudText.Draw( renderer, 20.0f, 20.0f );
+		break;
+
+	case GameState::GameOver:
+		engine.GetPS().Draw(renderer);
+
+		a_stateText.Draw( renderer, 250.0f, 475.0f );
+		break;
+
+	default:
+		break;
 	}
-
-	Game::Draw(renderer);
-
-	engine.GetPS().Draw(renderer);
-
-	a_text.Draw( renderer, 400.0f, 400.0f );
 
 	renderer.Present();
 }

@@ -24,7 +24,6 @@ namespace nu {
 
 	public:
 		SpaceGame();
-
 		int Run();
 
 		bool Initialize() override;
@@ -48,6 +47,9 @@ namespace nu {
 		void CheckCollisions();
 		void CreateExplosion(const Vector2& position, const Color& color, int particleCount = 100);
 		void EmitPlayerParticle();
+		void StartNewGame();
+		void EndGame();
+		void UpdateHUDText();
 
 	private:
 		Scene a_gameScene;
@@ -59,7 +61,8 @@ namespace nu {
 		Player* a_player{ nullptr };
 
 		Font a_font;
-		Text a_text;
+		Text a_stateText;
+		Text a_hudText;
 
 		std::vector<Vector2> a_mousePoints;
 		std::vector<bool> a_startsNewShape;
@@ -68,11 +71,12 @@ namespace nu {
 		int a_lives{ 3 };
 
 		float a_rotationSpeed{ 180.0f };
+		float a_playerInvincibilityTimer{ 0.0f };
 
 		bool a_quit{ false };
 
 		GameState a_gameState{
-			GameState::Game
+			GameState::StartGame
 		};
 	};
 }

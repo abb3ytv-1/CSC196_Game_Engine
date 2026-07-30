@@ -27,9 +27,16 @@ Text::~Text() {
 }
 
 bool Text::Create( const Renderer& renderer, const std::string& text, const Color& color) {
-	if ( a_font == nullptr || a_font->a_ttfFont == nullptr ) {
+	if (a_font == nullptr) {
 		std::cerr
-			<< "Text does not have a valid font.\n";
+			<< "Text has no Font object.\n";
+
+		return false;
+	}
+
+	if (a_font->a_ttfFont == nullptr) {
+		std::cerr
+			<< "Font object exists, but a_ttfFont is null.\n";
 
 		return false;
 	}

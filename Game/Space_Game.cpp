@@ -15,15 +15,16 @@
 #include <string>
 #include <memory>
 #include <utility>
+#include <iostream>
 
 using namespace nu;
 
-SpaceGame::SpaceGame() :
-	a_stateText{ &a_font }, a_hudText{ &a_font }
-{}
+SpaceGame::SpaceGame() : a_stateText{ &a_font }, a_hudText{ &a_font } {}
 
 int SpaceGame::Run() {
-	if (!Initialize()) { return 1; }
+	if (!Initialize()) {
+		return 1;
+	}
 
 	Renderer& renderer = engine.GetRenderer();
 
@@ -46,29 +47,42 @@ int SpaceGame::Run() {
 }
 
 bool SpaceGame::Initialize() {
-	if (!Game::Initialize()) {
+	if (!Game::Initialize()) { return false; }
+
+	a_scene = &a_gameScene;
+
+	if (!SetWorkingDirectory("Assets")) {
+		std::cerr
+			<< "Could not set Assets working directory.\n";
+
 		return false;
-		a_scene = &a_gameScene;
-		if (!SetWorkingDirectory("Assets")) { return false; }
-
-		LoadHighScore();
-
-		if (!a_font.Load("Fonts/New Moon.ttf", 48.0f)) { return false; }
-		std::string titleMessage = "Fishy Space Adventure | High Score: " + std::to_string(a_highScore) + " | Press Enter to Start";
-		if (!a_stateText.Create(engine.GetRenderer(), titleMessage, Color{ 0.45f, 0.85f, 1.0f })) { return false; }
-		std::string hudMessage = "Score: 0 | High Score: " + std::to_string(a_highScore) + " | Lives: 3 | Level: 1";
-		if (!a_hudText.Create(engine.GetRenderer(), hudMessage, Color{ 1.0f, 1.0f, 1.0f })) { return false; }
-		if (!LoadAudio()) { return false; }
-
-		a_playerModel = CreatePlayerModel();
-		a_enemyModel = CreateEnemyModel();
-		a_fastEnemyModel = CreateFastEnemyModel();
-		a_bulletModel = CreateBulletModel();
-
-		a_gameState = GameState::StartGame;
-
-		return true;
 	}
+
+	LoadHighScore();
+
+	if (!a_font.Load( "Fonts/New Moon.ttf", 48.0f )) { return false; }
+
+	a_stateText.SetFont(&a_font);
+	a_hudText.SetFont(&a_font);
+
+	std::string titleMessage = "Fishy's Space Adventure | High Score: " + std::to_string(a_highScore) + " | Press Enter to Start";
+
+	if (!a_stateText.Create( engine.GetRenderer(), titleMessage, Color{ 0.45f, 0.85f, 1.0f } )) { return false; }
+
+	std::string hudMessage = "Score: 0 | High Score: " + std::to_string(a_highScore) + " | Lives: 3 | Level: 1";
+
+	if (!a_hudText.Create( engine.GetRenderer(), hudMessage, Color{ 1.0f, 1.0f, 1.0f } )) { return false; }
+
+	if (!LoadAudio()) { return false; }
+
+	a_playerModel = CreatePlayerModel();
+	a_enemyModel = CreateEnemyModel();
+	a_fastEnemyModel = CreateFastEnemyModel();
+	a_bulletModel = CreateBulletModel();
+
+	a_gameState = GameState::StartGame;
+
+	return true;
 }
 
 bool SpaceGame::LoadAudio() {
@@ -268,6 +282,8 @@ void SpaceGame::HandleShooting() {
 	auto bullet = std::make_unique<Bullet>( Transform{ bulletPosition, rotation, 4.0f }, a_bulletModel, 700.0f, 2.0f );
 
 	a_gameScene.AddActor( std::move(bullet) );
+
+	engine.GetAudio().PlaySound("snare");
 }
 
 void SpaceGame::HandleMouseInput() {
@@ -313,6 +329,8 @@ void SpaceGame::CheckCollisions() {
 				bullet->Destroy();
 				enemy->Destroy();
 
+				engine.GetAudio().PlaySound("clap");
+
 				CreateExplosion( explosionPosition, Color{ 1.0f, 0.65f, 0.2f }, 100 );
 
 				a_score++;
@@ -342,6 +360,9 @@ void SpaceGame::CheckCollisions() {
 		CreateExplosion( collisionPosition, Color{ 1.0f, 0.2f, 0.2f }, 75 );
 
 		a_lives--;
+
+		engine.GetAudio().PlaySound("bass");
+
 		UpdateHUDText();
 
 		if (a_lives <= 0) { gameOver = true; break; }
@@ -434,6 +455,8 @@ void SpaceGame::StartNewGame() {
 }
 
 void SpaceGame::EndGame() {
+	engine.GetAudio().PlaySound("cowbell");
+
 	a_gameScene.RemoveAll();
 	a_player = nullptr;
 
@@ -469,6 +492,8 @@ void SpaceGame::StartNextLevel() {
 		message,
 		Color{ 0.45f, 0.85f, 1.0f }
 	);
+
+	engine.GetAudio().PlaySound("open-hat");
 
 	UpdateHUDText();
 

@@ -24,8 +24,6 @@ bool Font::Load(
 		a_ttfFont = nullptr;
 	}
 
-	// Do not put "TTF_Font*" before a_ttfFont here.
-	// We are assigning the class member.
 	a_ttfFont = TTF_OpenFont(
 		filename.c_str(),
 		fontSize

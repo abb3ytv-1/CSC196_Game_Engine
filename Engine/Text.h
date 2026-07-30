@@ -34,6 +34,10 @@ namespace nu {
 			float y
 		);
 
+		void SetFont(Font* font) {
+			a_font = font;
+		}
+
 	private:
 		// Text uses the font but does not own it.
 		Font* a_font{ nullptr };
